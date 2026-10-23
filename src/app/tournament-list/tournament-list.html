@@ -1,0 +1,125 @@
+<main class="tournaments-page">
+  <mat-card appearance="outlined" class="tournaments-card">
+    <mat-card-header>
+      <div mat-card-avatar class="header-icon" aria-hidden="true">
+        <mat-icon>emoji_events</mat-icon>
+      </div>
+      <mat-card-title>Torneos de Vóley</mat-card-title>
+      <mat-card-subtitle>
+        {{ dataSource().length }}
+        {{ dataSource().length === 1 ? 'torneo' : 'torneos' }}
+      </mat-card-subtitle>
+      <a mat-flat-button routerLink="/tournaments/new">Nuevo torneo</a>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (actionErrorMessage()) {
+        <div class="action-error" role="alert">
+          <mat-icon aria-hidden="true">error_outline</mat-icon>
+          {{ actionErrorMessage() }}
+        </div>
+      }
+
+      <div *ngIf="loading()" class="state-panel" role="status" aria-live="polite">
+        <mat-spinner diameter="44"></mat-spinner>
+        <span>Cargando torneos…</span>
+      </div>
+
+      <div *ngIf="!loading() && errorMessage()" class="state-panel error-panel" role="alert">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+
+      <div *ngIf="!loading() && !errorMessage() && dataSource().length === 0" class="state-panel">
+        <mat-icon aria-hidden="true">list_alt</mat-icon>
+        <span>No se encontraron torneos.</span>
+      </div>
+
+      <div
+        *ngIf="!loading() && !errorMessage() && dataSource().length > 0"
+        class="table-scroll"
+        tabindex="0"
+        [attr.aria-label]="'Tabla de torneos; desplázate horizontalmente para ver todos los datos'"
+      >
+        <table mat-table [dataSource]="dataSource()">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let tournament">{{ tournament.name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Tipo</th>
+            <td mat-cell *matCellDef="let tournament">
+              {{ tournament.type === 'round_robin' ? 'Round Robin' : 'Fase de Grupos' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Categoría</th>
+            <td mat-cell *matCellDef="let tournament">{{ tournament.category }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="startDate">
+            <th mat-header-cell *matHeaderCellDef>Inicio</th>
+            <td mat-cell *matCellDef="let tournament" class="date-cell">
+              {{ tournament.startDate | date:'shortDate' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="endDate">
+            <th mat-header-cell *matHeaderCellDef>Fin</th>
+            <td mat-cell *matCellDef="let tournament" class="date-cell">
+              {{ tournament.endDate | date:'shortDate' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="teamCount">
+            <th mat-header-cell *matHeaderCellDef>Equipos</th>
+            <td mat-cell *matCellDef="let tournament" class="number-cell">
+              {{ tournament.teamCount }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let tournament">
+              <span class="status-badge" [class.active]="tournament.status === 'in_progress'">
+                <span class="status-dot" aria-hidden="true"></span>
+                {{ tournament.status === 'pending' ? 'Pendiente' :
+                   tournament.status === 'in_progress' ? 'En curso' : 'Finalizado' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions" stickyEnd>
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let tournament">
+              <a
+                mat-button
+                [routerLink]="['/tournaments', tournament.id, 'edit']"
+                [attr.aria-label]="'Editar torneo ' + tournament.name"
+              >
+                <mat-icon>edit</mat-icon>
+                Editar
+              </a>
+              <button
+                mat-button
+                type="button"
+                [disabled]="deletingIds().has(tournament.id)"
+                (click)="deleteTournament(tournament)"
+                [attr.aria-label]="'Eliminar torneo ' + tournament.name"
+              >
+                <mat-icon>delete</mat-icon>
+                @if (deletingIds().has(tournament.id)) {
+                  Eliminando…
+                } @else {
+                  Eliminar
+                }
+              </button>
+            </td>
+          </ng-container>
+        </table>
+      </div >
+    </mat-card-content>
+  </mat-card>
+</main>

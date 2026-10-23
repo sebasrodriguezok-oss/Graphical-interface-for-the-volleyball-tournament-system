@@ -1,0 +1,124 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.standings-page {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
+  padding: clamp(16px, 3vw, 40px);
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--mat-sys-primary) 10%, transparent),
+      transparent 32rem
+    ),
+    var(--mat-sys-surface-container-low);
+}
+
+.standings-card {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow: hidden;
+  background-color: var(--mat-sys-surface);
+}
+
+mat-card-header {
+  align-items: center;
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+mat-card-title {
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-headline-small);
+}
+
+mat-card-subtitle {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-medium);
+}
+
+.header-icon {
+  display: grid;
+  place-items: center;
+  color: var(--mat-sys-on-primary-container);
+  background-color: var(--mat-sys-primary-container);
+}
+
+mat-card-content {
+  padding: 0;
+}
+
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  outline: none;
+}
+
+table {
+  width: max-content;
+  min-width: 100%;
+  background-color: var(--mat-sys-surface);
+}
+
+.mat-mdc-header-cell {
+  min-width: 60px;
+  white-space: nowrap;
+  color: var(--mat-sys-on-surface-variant);
+  background-color: var(--mat-sys-surface-container);
+  font: var(--mat-sys-label-large);
+  text-align: center;
+}
+
+.mat-mdc-cell {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  color: var(--mat-sys-on-surface);
+  border-bottom-color: var(--mat-sys-outline-variant);
+  font: var(--mat-sys-body-medium);
+  text-align: center;
+}
+
+.pos-cell {
+  font-weight: bold;
+  background-color: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-primary);
+}
+
+.team-name {
+  min-width: 200px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+}
+
+.number-cell {
+  font-variant-numeric: tabular-nums;
+}
+
+.points-cell {
+  font-weight: bold;
+  color: var(--mat-sys-primary);
+  font-size: 1.1rem;
+}
+
+.state-panel {
+  display: flex;
+  min-height: 260px;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.error-panel {
+  color: var(--mat-sys-error);
+}
+
+mat-card-header > a {
+  margin-left: auto;
+}

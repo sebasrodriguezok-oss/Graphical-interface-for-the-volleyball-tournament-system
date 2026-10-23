@@ -1,0 +1,60 @@
+<main class="form-page">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Inscribir Equipo en Torneo</mat-card-title>
+      <mat-card-subtitle>Vincula un equipo a un torneo para comenzar la competición</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-panel" role="status">
+          <mat-spinner diameter="36"></mat-spinner> Cargando datos…
+        </div>
+      }
+      @if (!loading()) {
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Seleccionar Torneo</mat-label>
+              <mat-select formControlName="tournamentId">
+                @for (t of tournaments(); track t.id) {
+                  <mat-option [value]="t.id">{{ t.name }} ({{ t.category }})</mat-option>
+                }
+              </mat-select>
+              @if (form.controls.tournamentId.invalid && form.controls.tournamentId.touched) {
+                <mat-error>El torneo es obligatorio</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Seleccionar Equipo</mat-label>
+              <mat-select formControlName="teamId">
+                @for (team of teams(); track team.id) {
+                  <mat-option [value]="team.id">{{ team.name }}</mat-option>
+                }
+              </mat-select>
+              @if (form.controls.teamId.invalid && form.controls.teamId.touched) {
+                <mat-error>El equipo es obligatorio</mat-error>
+              }
+            </mat-form-field>
+          </div >
+
+          @if (errorMessage()) {
+            <p class="error-message" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <div class="actions">
+            <a mat-button routerLink="/tournaments">Cancelar</a>
+            <button mat-flat-button type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <mat-spinner diameter="20"></mat-spinner> Procesando…
+              } @else {
+                Confirmar Inscripción
+              }
+            </button>
+          </div >
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</main>

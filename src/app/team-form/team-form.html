@@ -1,0 +1,75 @@
+<main class="form-page">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>
+        {{ isEditing() ? 'Editar Equipo' : 'Nuevo Equipo' }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isEditing() ? 'Modifica los datos del equipo y guarda los cambios' : 'Completa los datos para dar de alta un equipo' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-panel" role="status">
+          <mat-spinner diameter="36"></mat-spinner> Cargando equipo…
+        </div>
+      }
+      @if (loadFailed()) {
+        <p class="error-message" role="alert">{{ errorMessage() }}</p>
+        <a mat-button routerLink="/teams">Volver a equipos</a>
+      }
+      @if (!loading() && !loadFailed()) {
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre del Equipo</mat-label>
+              <input matInput formControlName="name" />
+              @if (form.controls.name.hasError('required')) {
+                <mat-error>El nombre es obligatorio</mat-error>
+              } @else if (form.controls.name.hasError('maxlength')) {
+                <mat-error>El máximo es de 100 caracteres</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Categoría</mat-label>
+              <input matInput formControlName="category" />
+              @if (form.controls.category.invalid && form.controls.category.touched) {
+                <mat-error>La categoría es obligatoria</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Entrenador (Opcional)</mat-label>
+              <input matInput formControlName="coach" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Cantidad de Jugadores</mat-label>
+              <input matInput type="number" formControlName="playerCount" />
+              @if (form.controls.playerCount.invalid && form.controls.playerCount.touched) {
+                <mat-error>Debe estar entre 1 y 30 jugadores</mat-error>
+              }
+            </mat-form-field>
+          </div >
+
+          @if (errorMessage()) {
+            <p class="error-message" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <div class="actions">
+            <a mat-button routerLink="/teams">Cancelar</a>
+            <button mat-flat-button type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <mat-spinner diameter="20"></mat-spinner> Guardando…
+              } @else {
+                {{ isEditing() ? 'Guardar cambios' : 'Crear Equipo' }}
+              }
+            </button>
+          </div >
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</main>

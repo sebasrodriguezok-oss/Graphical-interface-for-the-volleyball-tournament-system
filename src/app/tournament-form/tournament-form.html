@@ -1,0 +1,103 @@
+<main class="form-page">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>
+        {{ isEditing() ? 'Editar Torneo' : 'Nuevo Torneo' }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isEditing() ? 'Modifica los datos del torneo y guarda los cambios' : 'Completa los datos para crear un nuevo torneo' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-panel" role="status">
+          <mat-spinner diameter="36"></mat-spinner> Cargando torneo…
+        </div>
+      }
+      @if (loadFailed()) {
+        <p class="error-message" role="alert">{{ errorMessage() }}</p>
+        <a mat-button routerLink="/tournaments">Volver a torneos</a>
+      }
+      @if (!loading() && !loadFailed()) {
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre del Torneo</mat-label>
+              <input matInput formControlName="name" />
+              @if (form.controls.name.hasError('required')) {
+                <mat-error>El nombre es obligatorio</mat-error>
+              } @else if (form.controls.name.hasError('maxlength')) {
+                <mat-error>El máximo es de 100 caracteres</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Torneo</mat-label>
+              <mat-select formControlName="type">
+                <mat-option value="round_robin">Round Robin</mat-option>
+                <mat-option value="group_stage">Fase de Grupos</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Categoría</mat-label>
+              <input matInput formControlName="category" />
+              @if (form.controls.category.invalid && form.controls.category.touched) {
+                <mat-error>La categoría es obligatoria</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Inicio</mat-label>
+              <input matInput type="date" formControlName="startDate" />
+              @if (form.controls.startDate.invalid && form.controls.startDate.touched) {
+                <mat-error>La fecha es obligatoria</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de Fin</mat-label>
+              <input matInput type="date" formControlName="endDate" />
+              @if (form.controls.endDate.invalid && form.controls.endDate.touched) {
+                <mat-error>La fecha es obligatoria</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Cantidad de Equipos</mat-label>
+              <input matInput type="number" formControlName="teamCount" />
+              @if (form.controls.teamCount.invalid && form.controls.teamCount.touched) {
+                <mat-error>Debe estar entre 2 y 64 equipos</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="status">
+                <mat-option value="pending">Pendiente</mat-option>
+                <mat-option value="in_progress">En curso</mat-option>
+                <mat-option value="finished">Finalizado</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div >
+
+          @if (errorMessage()) {
+            <p class="error-message" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <div class="actions">
+            <a mat-button routerLink="/tournaments">Cancelar</a>
+            <button mat-flat-button type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <mat-spinner diameter="20"></mat-spinner> Guardando…
+              } @else {
+                {{ isEditing() ? 'Guardar cambios' : 'Crear Torneo' }}
+              }
+            </button>
+          </div >
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</main>

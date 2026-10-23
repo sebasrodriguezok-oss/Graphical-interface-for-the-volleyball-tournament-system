@@ -1,0 +1,100 @@
+<main class="teams-page">
+  <mat-card appearance="outlined" class="teams-card">
+    <mat-card-header>
+      <div mat-card-avatar class="header-icon" aria-hidden="true">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <mat-card-title>Equipos de Vóley</mat-card-title>
+      <mat-card-subtitle>
+        {{ dataSource().length }}
+        {{ dataSource().length === 1 ? 'equipo' : 'equipos' }}
+      </mat-card-subtitle>
+      <a mat-flat-button routerLink="/teams/new">Nuevo equipo</a>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (actionErrorMessage()) {
+        <div class="action-error" role="alert">
+          <mat-icon aria-hidden="true">error_outline</mat-icon>
+          {{ actionErrorMessage() }}
+        </div>
+      }
+
+      <div *ngIf="loading()" class="state-panel" role="status" aria-live="polite">
+        <mat-spinner diameter="44"></mat-spinner>
+        <span>Cargando equipos…</span>
+      </div>
+
+      <div *ngIf="!loading() && errorMessage()" class="state-panel error-panel" role="alert">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+
+      <div *ngIf="!loading() && !errorMessage() && dataSource().length === 0" class="state-panel">
+        <mat-icon aria-hidden="true">group_off</mat-icon>
+        <span>No se encontraron equipos.</span>
+      </div>
+
+      <div
+        *ngIf="!loading() && !errorMessage() && dataSource().length > 0"
+        class="table-scroll"
+        tabindex="0"
+        [attr.aria-label]="'Tabla de equipos; desplázate horizontalmente para ver todos los datos'"
+      >
+        <table mat-table [dataSource]="dataSource()">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let team" class="team-name">
+              {{ team.name }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Categoría</th>
+            <td mat-cell *matCellDef="let team">{{ team.category }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="coach">
+            <th mat-header-cell *matHeaderCellDef>Entrenador</th>
+            <td mat-cell *matCellDef="let team">{{ team.coach || 'N/A' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="playerCount">
+            <th mat-header-cell *matHeaderCellDef>Jugadores</th>
+            <td mat-cell *matCellDef="let team" class="number-cell">
+              {{ team.playerCount }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions" stickyEnd>
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let team">
+              <a
+                mat-button
+                [routerLink]="['/teams', team.id, 'edit']"
+                [attr.aria-label]="'Editar equipo ' + team.name"
+              >
+                <mat-icon>edit</mat-icon>
+                Editar
+              </a>
+              <button
+                mat-button
+                type="button"
+                [disabled]="deletingIds().has(team.id)"
+                (click)="deleteTeam(team)"
+                [attr.aria-label]="'Eliminar equipo ' + team.name"
+              >
+                <mat-icon>delete</mat-icon>
+                @if (deletingIds().has(team.id)) {
+                  Eliminando…
+                } @else {
+                  Eliminar
+                }
+              </button>
+            </td>
+          </ng-container>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</main>

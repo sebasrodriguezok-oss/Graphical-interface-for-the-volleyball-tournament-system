@@ -1,0 +1,114 @@
+:host {
+  display: block;
+}
+
+.form-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: clamp(24px, 5vw, 60px);
+  background-color: white;
+  display: flex;
+  justify-content: center;
+}
+
+mat-card {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+mat-card-header {
+  padding: 0 0 32px 0;
+  border: none;
+  margin-bottom: 24px;
+}
+
+mat-card-title {
+  color: var(--primary-color);
+  font-weight: 600 !important;
+  font-size: 32px !important;
+  margin-bottom: 8px !important;
+}
+
+mat-card-subtitle {
+  color: var(--text-muted) !important;
+  font-size: 16px !important;
+}
+
+mat-card-content {
+  padding: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 40px; /* Aumentado significativamente para evitar que las letras se peguen */
+}
+
+/* Estilo Minimalista: Línea inferior */
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none !important; /* Oculta el espacio del error/hint para evitar saltos */
+}
+
+::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: transparent !important;
+}
+
+::ng-deep .mdc-notched-outline__leading,
+::ng-deep .mdc-notched-outline__notch,
+::ng-deep .mdc-notched-outline__trailing {
+  border-color: transparent !important;
+}
+
+::ng-deep .mdc-notched-outline__notch {
+  border-bottom-color: black !important; /* La línea negra inferior */
+  border-bottom-width: 2px !important;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.actions button, .actions a {
+  color: var(--text-main) !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+}
+
+.actions button[type="submit"] {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+
+.actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+}
+
+@media (max-width: 700px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.loading-panel {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--mat-sys-on-surface-variant);
+}

@@ -1,0 +1,58 @@
+:host {
+  display: block;
+}
+
+.form-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: clamp(16px, 3vw, 40px);
+  background: var(--mat-sys-surface-container-low);
+}
+
+mat-card {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+mat-card-header {
+  padding: 24px;
+}
+
+mat-card-content {
+  padding: 0 24px 24px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-message {
+  color: var(--mat-sys-error);
+  margin: 16px 0;
+}
+
+.loading-panel {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--mat-sys-on-surface-variant);
+}
