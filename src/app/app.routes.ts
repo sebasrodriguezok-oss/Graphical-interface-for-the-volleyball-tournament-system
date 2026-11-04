@@ -1,3 +1,4 @@
+import { Home } from './home/home';
 import { Routes } from '@angular/router';
 import { TournamentList } from './tournament-list/tournament-list';
 import { TournamentForm } from './tournament-form/tournament-form';
@@ -17,5 +18,5 @@ export const routes: Routes = [
   { path: 'enroll', component: EnrollmentForm },
   { path: 'matches/:tournamentId', component: MatchesList },
   { path: 'standings/:tournamentId', component: StandingsList },
-  { path: '', redirectTo: '/tournaments', pathMatch: 'full' },
+  { path: '', component: Home, pathMatch: 'full' },
 ];
