@@ -1,15 +1,32 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { Tournament } from '../shared/voley';
+import { I18nService } from '../shared/i18n/i18n.service';
+import { TranslationKey } from '../shared/i18n/translations';
+import { Tournament, TournamentPayload } from '../shared/voley';
 import { VoleyService } from '../shared/voley.service';
+
+const dateOrderValidator: ValidatorFn = (
+  control: AbstractControl,
+): ValidationErrors | null => {
+  const startDate = control.get('startDate')?.value;
+  const endDate = control.get('endDate')?.value;
+
+  if (typeof startDate !== 'string' || typeof endDate !== 'string' || !startDate || !endDate) {
+    return null;
+  }
+
+  return endDate > startDate ? null : { dateOrder: true };
+};
 
 @Component({
   selector: 'app-tournament-form',
@@ -17,40 +34,76 @@ import { VoleyService } from '../shared/voley.service';
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatProgressSpinnerModule,
-    MatSelectModule,
   ],
   templateUrl: './tournament-form.html',
   styleUrl: './tournament-form.css',
 })
 export class TournamentForm implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly voleyService = inject(VoleyService);
+  private readonly router = inject(Router);
+
+  readonly i18n = inject(I18nService);
+  readonly currentYear = new Date().getFullYear();
   readonly tournamentId = signal<string | null>(null);
   readonly loading = signal(false);
   readonly loadFailed = signal(false);
   readonly isEditing = computed(() => this.tournamentId() !== null);
   readonly saving = signal(false);
-  readonly errorMessage = signal<string | null>(null);
+  readonly errorMessage = signal<TranslationKey | null>(null);
 
-  readonly form = this.formBuilder.nonNullable.group({
-    name: ['', [Validators.required, Validators.pattern(/\\S/), Validators.maxLength(100)]],
-    type: ['round_robin', [Validators.required]],
-    category: ['', [Validators.required, Validators.maxLength(50)]],
-    startDate: [new Date().toISOString().substring(0, 10), [Validators.required]],
-    endDate: [new Date().toISOString().substring(0, 10), [Validators.required]],
-    teamCount: [4, [Validators.required, Validators.min(2), Validators.max(64)]],
-    status: ['pending', [Validators.required]],
-  });
+  readonly categoryOptions = [
+    { value: 'Sub 12 Femenino', label: 'Sub 12 Femenino' },
+    { value: 'Sub 12 Masculino', label: 'Sub 12 Masculino' },
+    { value: 'Sub 14 Femenino', label: 'Sub 14 Femenino' },
+    { value: 'Sub 14 Masculino', label: 'Sub 14 Masculino' },
+    { value: 'Sub 16 Femenino', label: 'Sub 16 Femenino' },
+    { value: 'Sub 16 Masculino', label: 'Sub 16 Masculino' },
+    { value: 'Sub 18 Femenino', label: 'Sub 18 Femenino' },
+    { value: 'Sub 18 Masculino', label: 'Sub 18 Masculino' },
+    { value: 'Sub 21 Femenino', label: 'Sub 21 Femenino' },
+    { value: 'Sub 21 Masculino', label: 'Sub 21 Masculino' },
+    { value: 'Primera División Femenino', label: 'Primera División Femenino' },
+    { value: 'Primera División Masculino', label: 'Primera División Masculino' },
+    { value: 'Maxivoley Femenino', label: 'Maxivoley Femenino' },
+    { value: 'Maxivoley Masculino', label: 'Maxivoley Masculino' },
+  ] as const satisfies readonly { value: string; label: TranslationKey }[];
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly voleyService: VoleyService,
-    private readonly router: Router,
-  ) {}
+  readonly statusOptions: {
+    value: Tournament['status'];
+    label: TranslationKey;
+  }[] = [
+    { value: 'pending', label: 'Pendiente' },
+    { value: 'in_progress', label: 'En curso' },
+    { value: 'finished', label: 'Finalizado' },
+  ];
+
+  readonly form = this.formBuilder.nonNullable.group(
+    {
+      name: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)]],
+      type: this.formBuilder.nonNullable.control<Tournament['type']>('round_robin', [
+        Validators.required,
+      ]),
+      category: ['', [Validators.required, Validators.maxLength(50)]],
+      startDate: ['', [Validators.required]],
+      endDate: ['', [Validators.required]],
+      teamCount: this.formBuilder.control<number | null>(
+        null,
+        [
+          Validators.required,
+          Validators.min(2),
+          Validators.max(20),
+          Validators.pattern(/^\d+$/),
+        ],
+      ),
+      status: this.formBuilder.nonNullable.control<Tournament['status'] | ''>('', [
+        Validators.required,
+      ]),
+    },
+    { validators: dateOrderValidator },
+  );
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -59,6 +112,53 @@ export class TournamentForm implements OnInit {
     if (id) {
       this.loadTournament(id);
     }
+  }
+
+  onLanguageChange(event: Event): void {
+    const target = event.target;
+
+    if (target instanceof HTMLSelectElement) {
+      this.i18n.setLanguage(target.value);
+    }
+  }
+
+  submit(): void {
+    if (this.saving() || this.loading() || this.loadFailed()) return;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.saving.set(true);
+    this.errorMessage.set(null);
+
+    const id = this.tournamentId();
+    const formValue = this.form.getRawValue();
+    if (formValue.teamCount === null || formValue.status === '') {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const tournamentData: TournamentPayload = {
+      ...formValue,
+      teamCount: formValue.teamCount,
+      status: formValue.status,
+    };
+    const request$ = id
+      ? this.voleyService.updateTournament(id, tournamentData)
+      : this.voleyService.createTournament(tournamentData);
+
+    request$.pipe(finalize(() => this.saving.set(false))).subscribe({
+      next: () => this.router.navigate(['/tournaments']),
+      error: () => {
+        this.errorMessage.set(
+          id
+            ? 'No se pudo actualizar el torneo. Revisa los datos e intenta nuevamente.'
+            : 'No se pudo crear el torneo. Revisa los datos e intenta nuevamente.',
+        );
+      },
+    });
   }
 
   private loadTournament(id: string): void {
@@ -77,7 +177,6 @@ export class TournamentForm implements OnInit {
             startDate: tournament.startDate instanceof Date
               ? tournament.startDate.toISOString().substring(0, 10)
               : String(tournament.startDate).substring(0, 10),
-
             endDate: tournament.endDate instanceof Date
               ? tournament.endDate.toISOString().substring(0, 10)
               : String(tournament.endDate).substring(0, 10),
@@ -90,34 +189,5 @@ export class TournamentForm implements OnInit {
           this.errorMessage.set('No se pudo cargar el torneo.');
         },
       });
-  }
-
-  submit(): void {
-    if (this.saving() || this.loading() || this.loadFailed()) return;
-
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    this.saving.set(true);
-    this.errorMessage.set(null);
-
-    const id = this.tournamentId();
-    const request$ = id
-      ? this.voleyService.updateTournament(id, this.form.getRawValue() as any)
-      : this.voleyService.createTournament(this.form.getRawValue() as any);
-
-
-    request$.pipe(finalize(() => this.saving.set(false))).subscribe({
-      next: () => this.router.navigate(['/tournaments']),
-      error: () => {
-        this.errorMessage.set(
-          id
-            ? 'No se pudo actualizar el torneo. Revisa los datos e intenta nuevamente.'
-            : 'No se pudo crear el torneo. Revisa los datos e intenta nuevamente.',
-        );
-      },
-    });
   }
 }

@@ -1,13 +1,18 @@
 export interface Tournament {
   id: string;
   name: string;
-  type: 'round_robin' | 'group_stage';
+  type: 'round_robin';
   category: string;
   startDate: Date;
   endDate: Date;
   teamCount: number;
   status: 'pending' | 'in_progress' | 'finished';
 }
+
+export type TournamentPayload = Omit<Tournament, 'id' | 'startDate' | 'endDate'> & {
+  startDate: string;
+  endDate: string;
+};
 
 export interface Team {
   id: string;

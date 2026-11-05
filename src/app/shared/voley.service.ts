@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Tournament, Team, Match, Enrollment, Standing } from './voley';
+import { Tournament, TournamentPayload, Team, Match, Enrollment, Standing } from './voley';
 
 @Injectable({
   providedIn: 'root',
@@ -20,11 +20,11 @@ export class VoleyService {
     return this.httpClient.get<Tournament>(`${this.apiUrl}/tournaments/${id}`);
   }
 
-  createTournament(tournament: Partial<Tournament>): Observable<Tournament> {
+  createTournament(tournament: TournamentPayload): Observable<Tournament> {
     return this.httpClient.post<Tournament>(`${this.apiUrl}/tournaments`, tournament);
   }
 
-  updateTournament(id: string, changes: Partial<Tournament>): Observable<Tournament> {
+  updateTournament(id: string, changes: Partial<TournamentPayload>): Observable<Tournament> {
     return this.httpClient.put<Tournament>(`${this.apiUrl}/tournaments/${id}`, changes);
   }
 
