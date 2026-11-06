@@ -9,7 +9,7 @@ export interface Tournament {
   status: 'pending' | 'in_progress' | 'finished';
 }
 
-export type TournamentPayload = Omit<Tournament, 'id' | 'startDate' | 'endDate'> & {
+export type TournamentPayload = Omit<Tournament, 'id' | 'status' | 'startDate' | 'endDate'> & {
   startDate: string;
   endDate: string;
 };
@@ -21,6 +21,9 @@ export interface Team {
   coach?: string;
   playerCount: number;
 }
+
+export type TeamPayload = Omit<Team, 'id'>;
+export type TeamUpdate = Partial<TeamPayload>;
 
 export enum MatchStatus {
   Scheduled = 'scheduled',

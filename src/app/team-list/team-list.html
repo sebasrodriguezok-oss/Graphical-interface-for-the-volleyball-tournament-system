@@ -1,100 +1,167 @@
 <main class="teams-page">
-  <mat-card appearance="outlined" class="teams-card">
-    <mat-card-header>
-      <div mat-card-avatar class="header-icon" aria-hidden="true">
-        <mat-icon>groups</mat-icon>
-      </div>
-      <mat-card-title>Equipos de Vóley</mat-card-title>
-      <mat-card-subtitle>
-        {{ dataSource().length }}
-        {{ dataSource().length === 1 ? 'equipo' : 'equipos' }}
-      </mat-card-subtitle>
-      <a mat-flat-button routerLink="/teams/new">Nuevo equipo</a>
-    </mat-card-header>
+  <section class="teams-hero" aria-labelledby="teams-title">
+    <header class="site-header">
+      <nav class="main-nav" [attr.aria-label]="i18n.t('Menú principal')">
+        <a class="main-nav__link" routerLink="/">{{ i18n.t('Inicio') }}</a>
+        <label class="language-picker">
+          <span>{{ i18n.t('Idioma') }}</span>
+          <select
+            [attr.aria-label]="i18n.t('Seleccionar idioma')"
+            [value]="i18n.language()"
+            (change)="onLanguageChange($event)"
+          >
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </nav>
 
-    <mat-card-content>
-      @if (actionErrorMessage()) {
-        <div class="action-error" role="alert">
-          <mat-icon aria-hidden="true">error_outline</mat-icon>
-          {{ actionErrorMessage() }}
+      <a class="brand" routerLink="/" [attr.aria-label]="i18n.t('Ace Tournaments, inicio')">
+        <img class="brand__ball" src="assets/volley-ball.png" alt="" aria-hidden="true" />
+        <span>Ace Tournaments</span>
+      </a>
+
+      <div class="brand-stripes" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </header>
+
+    <div class="teams-content">
+      <div class="teams-heading">
+        <div>
+          <h1 id="teams-title">{{ i18n.t('Equipos') }}</h1>
+          <p>{{ i18n.t('Gestiona los equipos registrados en el sistema') }}</p>
         </div>
+        <div class="teams-actions">
+          <a class="create-button" routerLink="/teams/new">
+            <span aria-hidden="true">+</span>
+            {{ i18n.t('Crear equipo') }}
+          </a>
+          <a class="create-button" routerLink="/tournaments">
+            {{ i18n.t('Ver torneos') }}
+          </a>
+        </div>
+      </div>
+
+      <div class="team-tools">
+        <label class="search-box">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <span class="visually-hidden">{{ i18n.t('Buscar equipo') }}</span>
+          <input
+            type="search"
+            [placeholder]="i18n.t('Buscar equipo…')"
+            [value]="searchTerm()"
+            (input)="onSearch($event)"
+          />
+        </label>
+        <button class="filter-chip" type="button" (click)="clearSearch()">
+          {{ i18n.t('Todos') }}
+        </button>
+      </div>
+
+      @if (actionErrorMessage()) {
+        <p class="notice notice--error" role="alert">{{ i18n.t(actionErrorMessage()!) }}</p>
       }
 
-      <div *ngIf="loading()" class="state-panel" role="status" aria-live="polite">
-        <mat-spinner diameter="44"></mat-spinner>
-        <span>Cargando equipos…</span>
-      </div>
-
-      <div *ngIf="!loading() && errorMessage()" class="state-panel error-panel" role="alert">
-        <mat-icon aria-hidden="true">error_outline</mat-icon>
-        <span>{{ errorMessage() }}</span>
-      </div>
-
-      <div *ngIf="!loading() && !errorMessage() && dataSource().length === 0" class="state-panel">
-        <mat-icon aria-hidden="true">group_off</mat-icon>
-        <span>No se encontraron equipos.</span>
-      </div>
-
-      <div
-        *ngIf="!loading() && !errorMessage() && dataSource().length > 0"
-        class="table-scroll"
-        tabindex="0"
-        [attr.aria-label]="'Tabla de equipos; desplázate horizontalmente para ver todos los datos'"
-      >
-        <table mat-table [dataSource]="dataSource()">
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>Nombre</th>
-            <td mat-cell *matCellDef="let team" class="team-name">
-              {{ team.name }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef>Categoría</th>
-            <td mat-cell *matCellDef="let team">{{ team.category }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="coach">
-            <th mat-header-cell *matHeaderCellDef>Entrenador</th>
-            <td mat-cell *matCellDef="let team">{{ team.coach || 'N/A' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="playerCount">
-            <th mat-header-cell *matHeaderCellDef>Jugadores</th>
-            <td mat-cell *matCellDef="let team" class="number-cell">
-              {{ team.playerCount }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions" stickyEnd>
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let team">
-              <a
-                mat-button
-                [routerLink]="['/teams', team.id, 'edit']"
-                [attr.aria-label]="'Editar equipo ' + team.name"
-              >
-                <mat-icon>edit</mat-icon>
-                Editar
-              </a>
-              <button
-                mat-button
-                type="button"
-                [disabled]="deletingIds().has(team.id)"
-                (click)="deleteTeam(team)"
-                [attr.aria-label]="'Eliminar equipo ' + team.name"
-              >
-                <mat-icon>delete</mat-icon>
-                @if (deletingIds().has(team.id)) {
-                  Eliminando…
-                } @else {
-                  Eliminar
+      @if (loading()) {
+        <div class="state-panel" role="status">
+          <span class="loader" aria-hidden="true"></span>
+          {{ i18n.t('Cargando equipos…') }}
+        </div>
+      } @else if (errorMessage()) {
+        <div class="state-panel state-panel--error" role="alert">
+          {{ i18n.t(errorMessage()!) }}
+        </div>
+      } @else if (filteredTeams().length === 0) {
+        <div class="state-panel">
+          {{
+            searchTerm()
+              ? i18n.t('No hay equipos que coincidan con la búsqueda.')
+              : i18n.t('Todavía no hay equipos registrados.')
+          }}
+        </div>
+      } @else {
+        <div class="team-grid">
+          @for (team of filteredTeams(); track team.id) {
+            <article class="team-card">
+              <div class="team-card__inner">
+                <h2>{{ team.name }}</h2>
+                <p class="team-card__category">
+                  {{ i18n.t('Categoría') }}:
+                  <span>{{ team.category }}</span>
+                </p>
+                <p class="team-card__players">
+                  <span aria-hidden="true">♧</span>
+                  {{ team.playerCount }}
+                  {{
+                    i18n.t(team.playerCount === 1 ? 'jugador' : 'jugadores')
+                  }}
+                </p>
+                @if (team.coach) {
+                  <p class="team-card__coach">
+                    {{ i18n.t('Entrenador') }}: {{ team.coach }}
+                  </p>
                 }
-              </button>
-            </td>
-          </ng-container>
-        </table>
-      </div>
-    </mat-card-content>
-  </mat-card>
+
+                <div class="team-card__actions">
+                  <button
+                    class="team-action team-action--delete"
+                    type="button"
+                    [disabled]="deletingIds().has(team.id)"
+                    (click)="deleteTeam(team)"
+                  >
+                    {{
+                      deletingIds().has(team.id)
+                        ? i18n.t('Eliminando…')
+                        : i18n.t('Eliminar')
+                    }}
+                    <span aria-hidden="true">›</span>
+                  </button>
+                  <a
+                    class="team-action team-action--edit"
+                    [routerLink]="['/teams', team.id, 'edit']"
+                  >
+                    {{ i18n.t('Modificar') }}
+                    <span aria-hidden="true">›</span>
+                  </a>
+                  <a
+                    class="team-action team-action--details"
+                    [routerLink]="['/teams', team.id]"
+                  >
+                    {{ i18n.t('Ver detalles') }}
+                    <span aria-hidden="true">›</span>
+                  </a>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="site-footer__content">
+      <section class="footer-section" [attr.aria-label]="i18n.t('Producto')">
+        <h2>{{ i18n.t('Producto') }}</h2>
+        <a routerLink="/tournaments/new">{{ i18n.t('Crear torneo') }}</a>
+        <a routerLink="/tournaments">{{ i18n.t('Buscar torneo') }}</a>
+      </section>
+      <section class="footer-section" [attr.aria-label]="i18n.t('Contacto')">
+        <h2>{{ i18n.t('Contacto') }}</h2>
+        <div class="social-links">
+          <a href="https://www.linkedin.com/in/anaclara-guzman" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn del primer contribuidor">
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+          <a href="https://www.linkedin.com/in/sebastian-rodriguez-luna" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn del segundo contribuidor">
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+        </div>
+      </section>
+      <p class="site-footer__copyright">
+        © {{ currentYear }} Ace Tournaments |
+        {{ i18n.t('Todos los derechos reservados') }}
+      </p>
+    </div>
+  </footer>
 </main>

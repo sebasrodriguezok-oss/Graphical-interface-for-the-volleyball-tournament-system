@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   AbstractControl,
   FormBuilder,
@@ -25,7 +26,7 @@ const dateOrderValidator: ValidatorFn = (
     return null;
   }
 
-  return endDate > startDate ? null : { dateOrder: true };
+  return endDate >= startDate ? null : { dateOrder: true };
 };
 
 @Component({
@@ -53,6 +54,17 @@ export class TournamentForm implements OnInit {
   readonly isEditing = computed(() => this.tournamentId() !== null);
   readonly saving = signal(false);
   readonly errorMessage = signal<TranslationKey | null>(null);
+  readonly originalStartDate = signal<string | null>(null);
+  readonly today = this.getLocalDate();
+
+  private readonly startDateValidator: ValidatorFn = (control) => {
+    const value = control.value;
+    if (typeof value !== 'string' || !value) return null;
+    if (value >= this.today) return null;
+    return this.isEditing() && value === this.originalStartDate()
+      ? null
+      : { pastDate: true };
+  };
 
   readonly categoryOptions = [
     { value: 'Sub 12 Femenino', label: 'Sub 12 Femenino' },
@@ -71,15 +83,6 @@ export class TournamentForm implements OnInit {
     { value: 'Maxivoley Masculino', label: 'Maxivoley Masculino' },
   ] as const satisfies readonly { value: string; label: TranslationKey }[];
 
-  readonly statusOptions: {
-    value: Tournament['status'];
-    label: TranslationKey;
-  }[] = [
-    { value: 'pending', label: 'Pendiente' },
-    { value: 'in_progress', label: 'En curso' },
-    { value: 'finished', label: 'Finalizado' },
-  ];
-
   readonly form = this.formBuilder.nonNullable.group(
     {
       name: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)]],
@@ -87,20 +90,21 @@ export class TournamentForm implements OnInit {
         Validators.required,
       ]),
       category: ['', [Validators.required, Validators.maxLength(50)]],
-      startDate: ['', [Validators.required]],
-      endDate: ['', [Validators.required]],
+      startDate: ['', [
+        Validators.required,
+        Validators.pattern(/^\d{4}-\d{2}-\d{2}$/),
+        this.startDateValidator,
+      ]],
+      endDate: ['', [Validators.required, Validators.pattern(/^\d{4}-\d{2}-\d{2}$/)]],
       teamCount: this.formBuilder.control<number | null>(
         null,
         [
           Validators.required,
           Validators.min(2),
-          Validators.max(20),
+          Validators.max(16),
           Validators.pattern(/^\d+$/),
         ],
       ),
-      status: this.formBuilder.nonNullable.control<Tournament['status'] | ''>('', [
-        Validators.required,
-      ]),
     },
     { validators: dateOrderValidator },
   );
@@ -130,12 +134,11 @@ export class TournamentForm implements OnInit {
       return;
     }
 
-    this.saving.set(true);
     this.errorMessage.set(null);
 
     const id = this.tournamentId();
     const formValue = this.form.getRawValue();
-    if (formValue.teamCount === null || formValue.status === '') {
+    if (formValue.teamCount === null) {
       this.form.markAllAsTouched();
       return;
     }
@@ -143,20 +146,53 @@ export class TournamentForm implements OnInit {
     const tournamentData: TournamentPayload = {
       ...formValue,
       teamCount: formValue.teamCount,
-      status: formValue.status,
     };
+
+    this.saving.set(true);
+    this.voleyService
+      .getTournaments()
+      .subscribe({
+        next: (tournaments) => {
+          const normalizedName = this.normalizeName(tournamentData.name);
+          const duplicate = tournaments.some(
+            (tournament) =>
+              tournament.id !== id && this.normalizeName(tournament.name) === normalizedName,
+          );
+          if (duplicate) {
+            this.form.controls.name.setErrors({
+              ...this.form.controls.name.errors,
+              tournamentExists: true,
+            });
+            this.form.controls.name.markAsTouched();
+            this.saving.set(false);
+            return;
+          }
+          this.saveTournament(id, tournamentData);
+        },
+        error: () => {
+          this.saving.set(false);
+          this.errorMessage.set('No se pudieron verificar los torneos. Intenta nuevamente.');
+        },
+      });
+  }
+
+  startDateMin(): string {
+    const startDate = this.originalStartDate();
+    return startDate && startDate < this.today && this.form.controls.startDate.value === startDate
+      ? startDate
+      : this.today;
+  }
+
+  private saveTournament(id: string | null, data: TournamentPayload): void {
+    this.saving.set(true);
     const request$ = id
-      ? this.voleyService.updateTournament(id, tournamentData)
-      : this.voleyService.createTournament(tournamentData);
+      ? this.voleyService.updateTournament(id, data)
+      : this.voleyService.createTournament(data);
 
     request$.pipe(finalize(() => this.saving.set(false))).subscribe({
       next: () => this.router.navigate(['/tournaments']),
-      error: () => {
-        this.errorMessage.set(
-          id
-            ? 'No se pudo actualizar el torneo. Revisa los datos e intenta nuevamente.'
-            : 'No se pudo crear el torneo. Revisa los datos e intenta nuevamente.',
-        );
+      error: (error) => {
+        this.errorMessage.set(this.getApiErrorMessage(error, id));
       },
     });
   }
@@ -170,18 +206,15 @@ export class TournamentForm implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (tournament) => {
+          const startDate = this.toInputDate(tournament.startDate);
+          this.originalStartDate.set(startDate);
           this.form.patchValue({
             name: tournament.name,
             type: tournament.type,
             category: tournament.category,
-            startDate: tournament.startDate instanceof Date
-              ? tournament.startDate.toISOString().substring(0, 10)
-              : String(tournament.startDate).substring(0, 10),
-            endDate: tournament.endDate instanceof Date
-              ? tournament.endDate.toISOString().substring(0, 10)
-              : String(tournament.endDate).substring(0, 10),
+            startDate,
+            endDate: this.toInputDate(tournament.endDate),
             teamCount: tournament.teamCount,
-            status: tournament.status,
           });
         },
         error: () => {
@@ -189,5 +222,46 @@ export class TournamentForm implements OnInit {
           this.errorMessage.set('No se pudo cargar el torneo.');
         },
       });
+  }
+
+  private normalizeName(name: string): string {
+      return name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('es');
+  }
+
+  private toInputDate(value: Date | string): string {
+      return value instanceof Date
+        ? value.toISOString().substring(0, 10)
+        : String(value).substring(0, 10);
+  }
+
+  private getLocalDate(): string {
+      const now = new Date();
+      const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+      return localDate.toISOString().substring(0, 10);
+  }
+
+  private getApiErrorMessage(error: unknown, id: string | null): TranslationKey {
+      const message = error instanceof HttpErrorResponse
+        ? error.error?.error
+        : null;
+      const messages: Record<string, TranslationKey> = {
+        'A tournament with that name already exists': 'Ya existe un torneo con ese nombre',
+        'Tournament name is required': 'El nombre es obligatorio',
+        'End date must be equal to or after the start date': 'La fecha de finalización debe ser igual o posterior al inicio',
+        'Tournament team count must be an integer between 2 and 16': 'La cantidad debe estar entre 2 y 16',
+        'Team count cannot be lower than the number of enrolled teams': 'No se puede reducir la cantidad por debajo de los equipos inscriptos',
+        'Tournament structure cannot be changed after it has started': 'No se puede modificar la estructura de un torneo iniciado',
+        'Tournament structure cannot be changed after the fixture is generated or the tournament has started': 'No se puede modificar la estructura de un torneo con fixture',
+        'Tournament category cannot change while teams are enrolled': 'No se puede cambiar la categoría mientras haya equipos inscriptos',
+        'Tournament dates cannot exclude scheduled matches': 'Las fechas dejarían partidos fuera del período del torneo',
+        'Tournament type must be round_robin': 'Solo se permite la modalidad todos contra todos (Round Robin)',
+        'Tournament category is required': 'La categoría es obligatoria',
+        'Start date must use a valid YYYY-MM-DD date': 'La fecha de inicio no es válida',
+        'End date must use a valid YYYY-MM-DD date': 'La fecha de finalización no es válida',
+      };
+      if (typeof message === 'string' && messages[message]) return messages[message];
+      return id
+        ? 'No se pudo actualizar el torneo. Revisa los datos e intenta nuevamente.'
+        : 'No se pudo crear el torneo. Revisa los datos e intenta nuevamente.';
   }
 }

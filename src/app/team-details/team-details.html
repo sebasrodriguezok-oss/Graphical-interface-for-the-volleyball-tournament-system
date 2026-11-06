@@ -1,0 +1,110 @@
+<main class="details-page">
+  <section class="details-hero" aria-labelledby="team-details-title">
+    <header class="site-header">
+      <nav class="main-nav" [attr.aria-label]="i18n.t('Menú principal')">
+        <a class="main-nav__link" routerLink="/">{{ i18n.t('Inicio') }}</a>
+        <label class="language-picker">
+          <span>{{ i18n.t('Idioma') }}</span>
+          <select
+            [attr.aria-label]="i18n.t('Seleccionar idioma')"
+            [value]="i18n.language()"
+            (change)="onLanguageChange($event)"
+          >
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </nav>
+      <a class="brand" routerLink="/" [attr.aria-label]="i18n.t('Ace Tournaments, inicio')">
+        <img class="brand__ball" src="assets/volley-ball.png" alt="" aria-hidden="true" />
+        <span>Ace Tournaments</span>
+      </a>
+      <div class="brand-stripes" aria-hidden="true"><span></span><span></span><span></span></div>
+    </header>
+
+    <section class="details-content">
+      @if (loading()) {
+        <p class="details-message" role="status">{{ i18n.t('Cargando equipo…') }}</p>
+      } @else if (errorMessage() || !team()) {
+        <p class="details-message details-message--error" role="alert">
+          {{ i18n.t(errorMessage() ?? 'Error de carga de equipo') }}
+        </p>
+      } @else {
+        <div class="details-heading">
+          <div>
+            <p class="eyebrow">{{ i18n.t('Detalle del equipo') }}</p>
+            <h1 id="team-details-title">{{ team()!.name }}</h1>
+          </div>
+          <a class="details-button" [routerLink]="['/teams', team()!.id, 'edit']">
+            {{ i18n.t('Modificar equipo') }}
+          </a>
+        </div>
+
+        <section class="team-summary" [attr.aria-label]="i18n.t('Detalle del equipo')">
+          <p><strong>{{ i18n.t('Categoría') }}:</strong> {{ team()!.category }}</p>
+          <p><strong>{{ i18n.t('Cantidad de jugadores') }}:</strong> {{ team()!.playerCount }}</p>
+          @if (team()!.coach) {
+            <p><strong>{{ i18n.t('Entrenador') }}:</strong> {{ team()!.coach }}</p>
+          }
+        </section>
+
+        <section class="enrollment-section" aria-labelledby="enrollments-title">
+          <h2 id="enrollments-title">{{ i18n.t('Inscripciones') }}</h2>
+          @if (enrollments().length === 0) {
+            <p>{{ i18n.t('No hay inscripciones registradas para este equipo.') }}</p>
+          } @else {
+            <ul class="enrollment-list">
+              @for (item of enrollments(); track item.enrollment.id) {
+                <li class="enrollment-item">
+                  <div>
+                    <h3>{{ item.tournament?.name ?? i18n.t('Torneo no encontrado') }}</h3>
+                    <p>{{ i18n.t('Fecha de inscripción') }}:
+                      {{ formatEnrollmentDate(item.enrollment.enrollmentDate) }}
+                    </p>
+                  </div>
+                  <span class="enrollment-status">
+                    {{
+                      i18n.t(
+                        item.enrollment.status === 'active'
+                          ? 'Activa'
+                          : item.enrollment.status === 'withdrawn'
+                            ? 'Retirada'
+                            : 'Cancelada'
+                      )
+                    }}
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+        <a class="back-link" routerLink="/teams">{{ i18n.t('Ver todos los equipos') }}</a>
+      }
+    </section>
+  </section>
+
+  <footer class="site-footer">
+    <div class="site-footer__content">
+      <section class="footer-section" [attr.aria-label]="i18n.t('Producto')">
+        <h2>{{ i18n.t('Producto') }}</h2>
+        <a routerLink="/tournaments/new">{{ i18n.t('Crear torneo') }}</a>
+        <a routerLink="/tournaments">{{ i18n.t('Buscar torneo') }}</a>
+      </section>
+      <section class="footer-section" [attr.aria-label]="i18n.t('Contacto')">
+        <h2>{{ i18n.t('Contacto') }}</h2>
+        <div class="social-links">
+          <a href="https://www.linkedin.com/in/anaclara-guzman" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn del primer contribuidor">
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+          <a href="https://www.linkedin.com/in/sebastian-rodriguez-luna" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn del segundo contribuidor">
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+        </div>
+      </section>
+      <p class="site-footer__copyright">
+        © {{ currentYear }} Ace Tournaments |
+        {{ i18n.t('Todos los derechos reservados') }}
+      </p>
+    </div>
+  </footer>
+</main>

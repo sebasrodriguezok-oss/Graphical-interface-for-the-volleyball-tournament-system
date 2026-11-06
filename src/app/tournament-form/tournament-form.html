@@ -82,7 +82,9 @@
                 />
                 @if (form.controls.name.touched && form.controls.name.invalid) {
                   <span class="field-error" id="name-error" role="alert">
-                    @if (form.controls.name.hasError('maxlength')) {
+                    @if (form.controls.name.hasError('tournamentExists')) {
+                      {{ i18n.t('Ya existe un torneo con ese nombre') }}
+                    } @else if (form.controls.name.hasError('maxlength')) {
                       {{ i18n.t('El nombre no puede superar 100 caracteres') }}
                     } @else {
                       {{ i18n.t('El nombre es obligatorio') }}
@@ -98,12 +100,19 @@
                   class="control"
                   type="date"
                   formControlName="startDate"
+                  [min]="startDateMin()"
                   [attr.aria-invalid]="form.controls.startDate.invalid && form.controls.startDate.touched"
                   [attr.aria-describedby]="form.controls.startDate.touched ? 'start-date-error' : null"
                 />
                 @if (form.controls.startDate.touched && form.controls.startDate.invalid) {
                   <span class="field-error" id="start-date-error" role="alert">
-                    {{ i18n.t('La fecha de inicio es obligatoria') }}
+                    @if (form.controls.startDate.hasError('pastDate')) {
+                      {{ i18n.t('La fecha de inicio no puede ser anterior a hoy') }}
+                    } @else if (form.controls.startDate.hasError('pattern')) {
+                      {{ i18n.t('La fecha de inicio no es válida') }}
+                    } @else {
+                      {{ i18n.t('La fecha de inicio es obligatoria') }}
+                    }
                   </span>
                 }
               </div>
@@ -123,23 +132,27 @@
                 />
                 @if (form.controls.endDate.touched && form.controls.endDate.invalid) {
                   <span class="field-error" id="end-date-error" role="alert">
-                    {{ i18n.t('La fecha de finalización es obligatoria') }}
+                    @if (form.controls.endDate.hasError('pattern')) {
+                      {{ i18n.t('La fecha de finalización no es válida') }}
+                    } @else {
+                      {{ i18n.t('La fecha de finalización es obligatoria') }}
+                    }
                   </span>
                 } @else if (form.hasError('dateOrder') && form.controls.endDate.touched) {
                   <span class="field-error" id="end-date-error" role="alert">
-                    {{ i18n.t('La fecha de finalización debe ser posterior al inicio') }}
+                    {{ i18n.t('La fecha de finalización debe ser igual o posterior al inicio') }}
                   </span>
                 }
               </div>
 
               <div class="field">
-                <label for="tournament-type">{{ i18n.t('Tipo de torneo') }}</label>
+                <label for="tournament-type">{{ i18n.t('Modalidad') }}</label>
                 <select
                   id="tournament-type"
                   class="control control--select"
                   formControlName="type"
                 >
-                  <option value="round_robin">{{ i18n.t('Round Robin') }}</option>
+                  <option value="round_robin">{{ i18n.t('Todos contra todos (Round Robin)') }}</option>
                 </select>
               </div>
 
@@ -165,27 +178,6 @@
               </div>
 
               <div class="field">
-                <label for="status">{{ i18n.t('Estado') }}</label>
-                <select
-                  id="status"
-                  class="control control--select"
-                  formControlName="status"
-                  [attr.aria-invalid]="form.controls.status.invalid && form.controls.status.touched"
-                  [attr.aria-describedby]="form.controls.status.touched ? 'status-error' : null"
-                >
-                  <option value="" disabled>{{ i18n.t('Seleccionar estado') }}</option>
-                  @for (status of statusOptions; track status.value) {
-                    <option [value]="status.value">{{ i18n.t(status.label) }}</option>
-                  }
-                </select>
-                @if (form.controls.status.touched && form.controls.status.invalid) {
-                  <span class="field-error" id="status-error" role="alert">
-                    {{ i18n.t('El estado es obligatorio') }}
-                  </span>
-                }
-              </div>
-
-              <div class="field">
                 <label for="team-count">{{ i18n.t('Cantidad de equipos') }}</label>
                 <input
                   id="team-count"
@@ -193,7 +185,7 @@
                   type="number"
                   formControlName="teamCount"
                   min="2"
-                  max="20"
+                  max="16"
                   step="1"
                   [attr.aria-invalid]="form.controls.teamCount.invalid && form.controls.teamCount.touched"
                   [attr.aria-describedby]="form.controls.teamCount.touched ? 'team-count-error' : null"
@@ -203,7 +195,7 @@
                     @if (form.controls.teamCount.hasError('pattern')) {
                       {{ i18n.t('La cantidad debe ser un número entero') }}
                     } @else {
-                      {{ i18n.t('La cantidad debe estar entre 2 y 20') }}
+                      {{ i18n.t('La cantidad debe estar entre 2 y 16') }}
                     }
                   </span>
                 }
@@ -222,7 +214,7 @@
               <button
                 class="form-button form-button--primary"
                 type="submit"
-                [disabled]="saving() || loading()"
+                [disabled]="saving() || loading() || form.invalid"
               >
                 @if (saving()) {
                   <mat-spinner diameter="20"></mat-spinner>

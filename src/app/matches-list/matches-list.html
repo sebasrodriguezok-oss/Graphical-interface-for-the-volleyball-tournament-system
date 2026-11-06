@@ -1,106 +1,159 @@
 <main class="matches-page">
-  <mat-card appearance="outlined" class="matches-card">
-    <mat-card-header>
-      <div mat-card-avatar class="header-icon" aria-hidden="true">
-        <mat-icon>event_note</mat-icon>
+  <section class="matches-content" aria-labelledby="matches-title">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">{{ i18n.t('Fixture del torneo') }}</p>
+        <h1 id="matches-title">{{ tournament()?.name ?? i18n.t('Calendario de partidos') }}</h1>
+        <p class="page-subtitle">{{ i18n.t('Partidos organizados por ronda') }}</p>
       </div>
-      <mat-card-title>Calendario de Partidos</mat-card-title>
-      <mat-card-subtitle>Partidos programados y resultados del torneo</mat-card-subtitle>
-      <a mat-button routerLink="/tournaments">Volver a Torneos</a>
-    </mat-card-header>
+      <nav class="page-actions" [attr.aria-label]="i18n.t('Acciones del torneo')">
+        @if (tournamentId(); as id) {
+          <a class="secondary-button" [routerLink]="['/standings', id]">
+            {{ i18n.t('Tabla de posiciones') }}
+          </a>
+          <a class="secondary-button" [routerLink]="['/tournaments', id]">
+            {{ i18n.t('Volver al torneo') }}
+          </a>
+        }
+        <a class="secondary-button" routerLink="/tournaments">{{ i18n.t('Ver torneos') }}</a>
+      </nav>
+    </header>
 
-    <mat-card-content>
-      <div *ngIf="loading()" class="state-panel" role="status" aria-live="polite">
-        <mat-spinner diameter="44"></mat-spinner>
-        <span>Cargando calendario…</span>
+    @if (actionErrorMessage()) {
+      <p class="notice notice--error" role="alert">{{ actionErrorMessage() }}</p>
+    }
+    @if (actionSuccessMessage()) {
+      <p class="notice notice--success" role="status">{{ i18n.t(actionSuccessMessage()!) }}</p>
+    }
+
+    @if (loading()) {
+      <div class="state-panel" role="status" aria-live="polite">
+        <span class="loader" aria-hidden="true"></span>
+        {{ i18n.t('Cargando fixture…') }}
       </div>
-
-      <div *ngIf="!loading() && errorMessage()" class="state-panel error-panel" role="alert">
-        <mat-icon aria-hidden="true">error_outline</mat-icon>
-        <span>{{ errorMessage() }}</span>
+    } @else if (errorMessage()) {
+      <div class="state-panel state-panel--error" role="alert">{{ i18n.t(errorMessage()!) }}</div>
+    } @else if (matches().length === 0) {
+      <div class="state-panel">
+        {{ i18n.t('No hay partidos programados para este torneo.') }}
       </div>
+    } @else {
+      <section class="progress-panel" [attr.aria-label]="i18n.t('Progreso del fixture')">
+        <div class="progress-heading">
+          <div>
+            <h2>{{ i18n.t('Progreso del fixture') }}</h2>
+            <p>
+              {{ i18n.t('Partidos resueltos') }}:
+              <strong>{{ completedMatches() }} / {{ matches().length }}</strong>
+            </p>
+          </div>
+          @if (tournament()?.status === 'finished') {
+            <span class="tournament-status tournament-status--finished">
+              {{ i18n.t('Torneo finalizado') }}
+            </span>
+          } @else if (tournament()?.status === 'in_progress') {
+            <span class="tournament-status tournament-status--active">
+              {{ i18n.t('En curso') }}
+            </span>
+          } @else {
+            <span class="tournament-status">{{ i18n.t('Pendiente') }}</span>
+          }
+        </div>
+        <div
+          class="progress-track"
+          role="progressbar"
+          [attr.aria-valuenow]="completionPercentage()"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-label]="i18n.t('Progreso del fixture')"
+        >
+          <span [style.width.%]="completionPercentage()"></span>
+        </div>
+        @if (tournament()?.status === 'finished') {
+          <p class="completion-message" role="status">
+            {{ i18n.t('El torneo finalizó automáticamente al cargarse todos los resultados.') }}
+          </p>
+        }
+      </section>
 
-      <div *ngIf="!loading() && !errorMessage() && matches().length === 0" class="state-panel">
-        <mat-icon aria-hidden="true">event_busy</mat-icon>
-        <span>No hay partidos programados para este torneo.</span>
-      </div>
+      @for (round of rounds(); track round.round) {
+        <section class="round-section" [attr.aria-labelledby]="'round-title-' + round.round">
+          <header class="round-heading">
+            <h2 [id]="'round-title-' + round.round">
+              {{ i18n.t('Ronda {round}', { round: round.round }) }}
+            </h2>
+            <span>
+              {{ completedMatchesInRound(round) }} /
+              {{ round.matches.length }} {{ i18n.t('partidos resueltos') }}
+            </span>
+          </header>
 
-      <div
-        *ngIf="!loading() && !errorMessage() && matches().length > 0"
-        class="table-scroll"
-        tabindex="0"
-      >
-        <table mat-table [dataSource]="matches()">
+          <div class="match-grid">
+            @for (match of round.matches; track match.id) {
+              <article class="match-card">
+                <div class="match-card__top">
+                  <span class="match-round-label">{{ i18n.t('Ronda {round}', { round: match.round }) }}</span>
+                  <span
+                    class="match-status"
+                    [class.match-status--finished]="match.status === 'finished'"
+                  >
+                    {{ i18n.t(match.status === 'finished' ? 'Finalizado' : match.status === 'scheduled' ? 'Programado' : 'En juego') }}
+                  </span>
+                </div>
 
-          <ng-container matColumnDef="round">
-            <th mat-header-cell *matHeaderCellDef>Ronda</th>
-            <td mat-cell *matCellDef="let match">Ronda {{ match.round }}</td>
-          </ng-container>
+                <div class="match-scoreboard">
+                  <div class="team-side">
+                    <span class="team-side__label">{{ i18n.t('Local') }}</span>
+                    <strong>{{ getTeamName(match.homeTeamId) }}</strong>
+                  </div>
+                  <div class="score-display" [attr.aria-label]="i18n.t('Resultado en sets')">
+                    <span>{{ match.homeScore ?? '–' }}</span>
+                    <span class="score-separator">:</span>
+                    <span>{{ match.awayScore ?? '–' }}</span>
+                  </div>
+                  <div class="team-side team-side--away">
+                    <span class="team-side__label">{{ i18n.t('Visitante') }}</span>
+                    <strong>{{ getTeamName(match.awayTeamId) }}</strong>
+                  </div>
+                </div>
 
-          <ng-container matColumnDef="homeTeam">
-            <th mat-header-cell *matHeaderCellDef>Equipo Local</th>
-            <td mat-cell *matCellDef="let match" class="team-name">
-              {{ getTeamName(match.homeTeamId) }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="homeScore">
-            <th mat-header-cell *matHeaderCellDef>Goles</th>
-            <td mat-cell *matCellDef="let match" class="score-cell">
-              {{ match.homeScore ?? '-' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="vs">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let match" class="vs-cell">VS</td>
-          </ng-container>
-
-          <ng-container matColumnDef="awayScore">
-            <th mat-header-cell *matHeaderCellDef>Goles</th>
-            <td mat-cell *matCellDef="let match" class="score-cell">
-              {{ match.awayScore ?? '-' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="awayTeam">
-            <th mat-header-cell *matHeaderCellDef>Equipo Visitante</th>
-            <td mat-cell *matCellDef="let match" class="team-name">
-              {{ getTeamName(match.awayTeamId) }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="date">
-            <th mat-header-cell *matHeaderCellDef>Fecha</th>
-            <td mat-cell *matCellDef="let match" class="date-cell">
-              {{ match.matchDate ? (match.matchDate | date:'short') : 'TBD' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let match">
-              <span class="status-badge" [class.finished]="match.status === 'finished'">
-                {{ match.status === 'scheduled' ? 'Programado' :
-                   match.status === 'in_progress' ? 'En Juego' : 'Finalizado' }}
-              </span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions" stickyEnd>
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let match">
-              <button mat-button (click)="updateScore(match)">
-                <mat-icon>edit</mat-icon>
-                Marcar
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
-      </div >
-    </mat-card-content>
-  </mat-card>
+                <div class="match-card__footer">
+                  <label [for]="'score-' + match.id">{{ i18n.t('Resultado de sets') }}</label>
+                  <div class="score-controls">
+                    <select
+                      [id]="'score-' + match.id"
+                      [value]="scoreSelection(match)"
+                      [disabled]="tournament()?.status === 'finished' || savingMatchIds().has(match.id)"
+                      (change)="setScoreSelection(match.id, $event)"
+                    >
+                      <option value="">{{ i18n.t('Selecciona el resultado') }}</option>
+                      @for (option of scoreOptions; track option.value) {
+                        <option [value]="option.value">
+                          {{ option.value }} · {{ i18n.t(option.winner) }}
+                        </option>
+                      }
+                    </select>
+                    <button
+                      type="button"
+                      class="save-score-button"
+                      [disabled]="!scoreSelection(match) || tournament()?.status === 'finished' || savingMatchIds().has(match.id)"
+                      (click)="saveScore(match)"
+                    >
+                      {{
+                        savingMatchIds().has(match.id)
+                          ? i18n.t('Guardando…')
+                          : match.status === 'finished'
+                            ? i18n.t('Actualizar resultado')
+                            : i18n.t('Guardar resultado')
+                      }}
+                    </button>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    }
+  </section>
 </main>
