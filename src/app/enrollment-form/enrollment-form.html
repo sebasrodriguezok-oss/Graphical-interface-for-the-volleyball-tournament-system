@@ -1,60 +1,156 @@
-<main class="form-page">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>Inscribir Equipo en Torneo</mat-card-title>
-      <mat-card-subtitle>Vincula un equipo a un torneo para comenzar la competición</mat-card-subtitle>
-    </mat-card-header>
+<main class="enrollment-page">
+  <section class="enrollment-hero" aria-labelledby="enrollment-title">
+    <header class="site-header">
+      <nav class="main-nav" [attr.aria-label]="i18n.t('Menú principal')">
+        <a class="main-nav__link" routerLink="/">{{ i18n.t('Inicio') }}</a>
+        <label class="language-picker">
+          <span>{{ i18n.t('Idioma') }}</span>
+          <select
+            [attr.aria-label]="i18n.t('Seleccionar idioma')"
+            [value]="i18n.language()"
+            (change)="onLanguageChange($event)"
+          >
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </nav>
 
-    <mat-card-content>
+      <a class="brand" routerLink="/" [attr.aria-label]="i18n.t('Ace Tournaments, inicio')">
+        <img class="brand__ball" src="assets/volley-ball.png" alt="" aria-hidden="true" />
+        <span>Ace Tournaments</span>
+      </a>
+
+      <div class="brand-stripes" aria-hidden="true"><span></span><span></span><span></span></div>
+    </header>
+
+    <section class="enrollment-content">
       @if (loading()) {
-        <div class="loading-panel" role="status">
-          <mat-spinner diameter="36"></mat-spinner> Cargando datos…
+        <div class="state-panel" role="status">
+          <span class="loader" aria-hidden="true"></span>
+          {{ i18n.t('Cargando datos de inscripción…') }}
+        </div>
+      } @else if (loadError()) {
+        <div class="state-panel state-panel--error" role="alert">
+          {{ i18n.t(loadError()!) }}
+        </div>
+      } @else {
+        <div class="form-layout">
+          <header class="form-heading">
+            <h1 id="enrollment-title">{{ i18n.t('Inscribir equipo al Torneo') }}</h1>
+            <p>{{ i18n.t('Vincula un equipo a un torneo para comenzar la competición') }}</p>
+          </header>
+
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <div class="field">
+              <label class="visually-hidden" for="tournament-select">
+                {{ i18n.t('Seleccionar torneo') }}
+              </label>
+              <select
+                id="tournament-select"
+                class="control"
+                formControlName="tournamentId"
+                [attr.aria-invalid]="form.controls.tournamentId.touched && form.controls.tournamentId.invalid"
+                (change)="onTournamentChange()"
+              >
+                <option value="">{{ i18n.t('Seleccionar torneo') }}</option>
+                @for (tournament of availableTournaments(); track tournament.id) {
+                  <option [value]="tournament.id">
+                    {{ tournament.name }} · {{ tournament.category }}
+                  </option>
+                }
+              </select>
+              @if (form.controls.tournamentId.touched && form.controls.tournamentId.invalid) {
+                <span class="field-error" role="alert">{{ i18n.t('El torneo es obligatorio') }}</span>
+              }
+              @if (availableTournaments().length === 0) {
+                <span class="helper-message">{{ i18n.t('No hay torneos pendientes disponibles para inscribir equipos.') }}</span>
+              }
+            </div>
+
+            @if (checkingTournament()) {
+              <p class="helper-message" role="status">{{ i18n.t('Verificando disponibilidad del torneo…') }}</p>
+            } @else if (tournamentEligibilityError()) {
+              <p class="field-error" role="alert">{{ i18n.t(tournamentEligibilityError()!) }}</p>
+            } @else if (tournamentEligibilityChecked() && selectedTournament()) {
+              <p class="helper-message">
+                {{ i18n.t('Categoría del torneo') }}: {{ selectedTournament()!.category }}
+                · {{ activeEnrollmentCount() }} / {{ selectedTournament()!.teamCount }}
+                {{ i18n.t('equipos inscriptos') }}
+              </p>
+            }
+
+            <div class="field">
+              <label class="visually-hidden" for="team-select">
+                {{ i18n.t('Seleccionar equipo') }}
+              </label>
+              <select
+                id="team-select"
+                class="control"
+                formControlName="teamId"
+                [disabled]="!tournamentEligibilityChecked() || checkingTournament() || !!tournamentEligibilityError()"
+                [attr.aria-invalid]="form.controls.teamId.touched && form.controls.teamId.invalid"
+                (change)="onTeamChange()"
+              >
+                <option value="">{{ i18n.t('Seleccionar equipo') }}</option>
+                @for (team of availableTeams(); track team.id) {
+                  <option [value]="team.id">{{ team.name }} · {{ team.category }}</option>
+                }
+              </select>
+              @if (form.controls.teamId.touched && form.controls.teamId.invalid) {
+                <span class="field-error" role="alert">{{ i18n.t('El equipo es obligatorio') }}</span>
+              }
+              @if (selectedTournament() && tournamentEligibilityChecked() && !tournamentEligibilityError() && availableTeams().length === 0) {
+                <span class="helper-message">{{ i18n.t('No hay equipos disponibles de la categoría del torneo.') }}</span>
+              }
+            </div>
+
+            @if (checkingTeam()) {
+              <p class="helper-message" role="status">{{ i18n.t('Verificando inscripción del equipo…') }}</p>
+            } @else if (teamEligibilityError()) {
+              <p class="field-error" role="alert">{{ i18n.t(teamEligibilityError()!) }}</p>
+            }
+            @if (apiErrorMessage()) {
+              <p class="form-error" role="alert">{{ apiErrorMessage() }}</p>
+            }
+
+            <div class="form-actions">
+              <a class="form-button form-button--secondary" [routerLink]="cancelLink()">
+                {{ i18n.t('Cancelar') }}
+                <span aria-hidden="true">›</span>
+              </a>
+              <button class="form-button" type="submit" [disabled]="!canSubmit()">
+                {{ saving() ? i18n.t('Procesando inscripción…') : i18n.t('Confirmar inscripción') }}
+                <span aria-hidden="true">›</span>
+              </button>
+            </div>
+          </form>
         </div>
       }
-      @if (!loading()) {
-        <form [formGroup]="form" (ngSubmit)="submit()">
-          <div class="form-grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Seleccionar Torneo</mat-label>
-              <mat-select formControlName="tournamentId">
-                @for (t of tournaments(); track t.id) {
-                  <mat-option [value]="t.id">{{ t.name }} ({{ t.category }})</mat-option>
-                }
-              </mat-select>
-              @if (form.controls.tournamentId.invalid && form.controls.tournamentId.touched) {
-                <mat-error>El torneo es obligatorio</mat-error>
-              }
-            </mat-form-field>
+    </section>
+  </section>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Seleccionar Equipo</mat-label>
-              <mat-select formControlName="teamId">
-                @for (team of teams(); track team.id) {
-                  <mat-option [value]="team.id">{{ team.name }}</mat-option>
-                }
-              </mat-select>
-              @if (form.controls.teamId.invalid && form.controls.teamId.touched) {
-                <mat-error>El equipo es obligatorio</mat-error>
-              }
-            </mat-form-field>
-          </div >
-
-          @if (errorMessage()) {
-            <p class="error-message" role="alert">{{ errorMessage() }}</p>
-          }
-
-          <div class="actions">
-            <a mat-button routerLink="/tournaments">Cancelar</a>
-            <button mat-flat-button type="submit" [disabled]="saving()">
-              @if (saving()) {
-                <mat-spinner diameter="20"></mat-spinner> Procesando…
-              } @else {
-                Confirmar Inscripción
-              }
-            </button>
-          </div >
-        </form>
-      }
-    </mat-card-content>
-  </mat-card>
+  <footer class="site-footer">
+    <div class="site-footer__content">
+      <section class="footer-section">
+        <h2>{{ i18n.t('Producto') }}</h2>
+        <a routerLink="/tournaments/new">{{ i18n.t('Crear torneo') }}</a>
+        <a routerLink="/tournaments">{{ i18n.t('Buscar torneo') }}</a>
+      </section>
+      <section class="footer-section">
+        <h2>{{ i18n.t('Contacto') }}</h2>
+        <div class="social-links">
+          <a href="https://www.linkedin.com/in/anaclara-guzman" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn del primer contribuidor">
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+          <a href="https://www.linkedin.com/in/sebastian-rodriguez-luna" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn del segundo contribuidor">
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+        </div>
+      </section>
+      <p class="site-footer__copyright">
+        © {{ currentYear }} Ace Tournaments | {{ i18n.t('Todos los derechos reservados') }}
+      </p>
+    </div>
+  </footer>
 </main>

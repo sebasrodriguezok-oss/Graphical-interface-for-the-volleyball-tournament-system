@@ -1,125 +1,176 @@
 <main class="tournaments-page">
-  <mat-card appearance="outlined" class="tournaments-card">
-    <mat-card-header>
-      <div mat-card-avatar class="header-icon" aria-hidden="true">
-        <mat-icon>emoji_events</mat-icon>
-      </div>
-      <mat-card-title>Torneos de Vóley</mat-card-title>
-      <mat-card-subtitle>
-        {{ dataSource().length }}
-        {{ dataSource().length === 1 ? 'torneo' : 'torneos' }}
-      </mat-card-subtitle>
-      <a mat-flat-button routerLink="/tournaments/new">Nuevo torneo</a>
-    </mat-card-header>
+  <section class="tournaments-hero" aria-labelledby="tournaments-title">
+    <header class="site-header">
+      <nav class="main-nav" [attr.aria-label]="i18n.t('Menú principal')">
+        <a class="main-nav__link" routerLink="/">{{ i18n.t('Inicio') }}</a>
+        <label class="language-picker">
+          <span>{{ i18n.t('Idioma') }}</span>
+          <select
+            [attr.aria-label]="i18n.t('Seleccionar idioma')"
+            [value]="i18n.language()"
+            (change)="onLanguageChange($event)"
+          >
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </nav>
 
-    <mat-card-content>
-      @if (actionErrorMessage()) {
-        <div class="action-error" role="alert">
-          <mat-icon aria-hidden="true">error_outline</mat-icon>
-          {{ actionErrorMessage() }}
+      <a class="brand" routerLink="/" [attr.aria-label]="i18n.t('Ace Tournaments, inicio')">
+        <img class="brand__ball" src="assets/volley-ball.png" alt="" aria-hidden="true" />
+        <span>Ace Tournaments</span>
+      </a>
+
+      <div class="brand-stripes" aria-hidden="true"><span></span><span></span><span></span></div>
+    </header>
+
+    <section class="tournaments-content">
+      <div class="tournament-tools">
+        <div class="tournament-search-area">
+          <h1 id="tournaments-title">{{ i18n.t('Encuentra Torneos') }}</h1>
+          <label class="search-label" for="tournament-search">
+            {{ i18n.t('Nombre del torneo') }}
+          </label>
+          <div class="search-box">
+            <span class="search-icon" aria-hidden="true"></span>
+            <input
+              id="tournament-search"
+              type="search"
+              [placeholder]="i18n.t('Buscar torneo…')"
+              [value]="searchQuery()"
+              (input)="setSearchQuery($event)"
+            />
+          </div>
+          <div class="filters" role="group" [attr.aria-label]="i18n.t('Filtrar torneos por estado')">
+            <button type="button" [class.selected]="statusFilter() === 'all'" (click)="statusFilter.set('all')">
+              {{ i18n.t('Todos') }}
+            </button>
+            <button type="button" [class.selected]="statusFilter() === 'pending'" (click)="statusFilter.set('pending')">
+              {{ i18n.t('Pendientes') }}
+            </button>
+            <button type="button" [class.selected]="statusFilter() === 'in_progress'" (click)="statusFilter.set('in_progress')">
+              {{ i18n.t('En curso') }}
+            </button>
+            <button type="button" [class.selected]="statusFilter() === 'finished'" (click)="statusFilter.set('finished')">
+              {{ i18n.t('Finalizados') }}
+            </button>
+          </div>
         </div>
+        <div class="create-actions">
+          <a class="create-button" routerLink="/tournaments/new">
+            <span aria-hidden="true">+</span>
+            {{ i18n.t('Crear torneo') }}
+          </a>
+          <a class="create-button" routerLink="/teams/new">
+            <span aria-hidden="true">+</span>
+            {{ i18n.t('Crear equipo') }}
+          </a>
+        </div>
+      </div>
+
+      <div class="list-heading">
+        <h2>{{ i18n.t('Torneos disponibles') }}</h2>
+        @if (!loading() && !errorMessage()) {
+          <span>{{ filteredTournaments().length }} {{ i18n.t('resultados') }}</span>
+        }
+      </div>
+
+      @if (actionErrorMessage()) {
+        <p class="notice notice--error" role="alert">{{ actionErrorMessage() }}</p>
+      }
+      @if (actionSuccessMessage()) {
+        <p class="notice notice--success" role="status">{{ actionSuccessMessage() }}</p>
       }
 
-      <div *ngIf="loading()" class="state-panel" role="status" aria-live="polite">
-        <mat-spinner diameter="44"></mat-spinner>
-        <span>Cargando torneos…</span>
-      </div>
+      @if (loading()) {
+        <div class="state-panel" role="status"><span class="spinner"></span>{{ i18n.t('Cargando torneos…') }}</div>
+      } @else if (errorMessage()) {
+        <div class="state-panel state-panel--error" role="alert">{{ i18n.t(errorMessage()!) }}</div>
+      } @else if (filteredTournaments().length === 0) {
+        <div class="state-panel">
+          {{ dataSource().length === 0 ? i18n.t('Todavía no hay torneos') : i18n.t('No hay torneos que coincidan') }}
+        </div>
+      } @else {
+        <div class="tournament-cards">
+          @for (tournament of filteredTournaments(); track tournament.id) {
+            <article class="tournament-card">
+              <div class="tournament-info">
+                <h3>{{ tournament.name }}</h3>
+                <p>{{ i18n.t('Todos contra todos (Round Robin)') }}</p>
+                <p class="tournament-date">
+                  <span class="calendar-icon" aria-hidden="true"></span>
+                  {{ tournament.startDate | date:'dd-MM-yyyy':'UTC' }}
+                  <span aria-hidden="true">—</span>
+                  {{ tournament.endDate | date:'dd-MM-yyyy':'UTC' }}
+                </p>
+                <p class="team-count">
+                  <span class="teams-icon" aria-hidden="true"></span>
+                  {{ tournament.teamCount }} {{ i18n.t('equipos') }}
+                  <span class="category">{{ tournament.category }}</span>
+                </p>
+              </div>
 
-      <div *ngIf="!loading() && errorMessage()" class="state-panel error-panel" role="alert">
-        <mat-icon aria-hidden="true">error_outline</mat-icon>
-        <span>{{ errorMessage() }}</span>
-      </div>
-
-      <div *ngIf="!loading() && !errorMessage() && dataSource().length === 0" class="state-panel">
-        <mat-icon aria-hidden="true">list_alt</mat-icon>
-        <span>No se encontraron torneos.</span>
-      </div>
-
-      <div
-        *ngIf="!loading() && !errorMessage() && dataSource().length > 0"
-        class="table-scroll"
-        tabindex="0"
-        [attr.aria-label]="'Tabla de torneos; desplázate horizontalmente para ver todos los datos'"
-      >
-        <table mat-table [dataSource]="dataSource()">
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>Nombre</th>
-            <td mat-cell *matCellDef="let tournament">{{ tournament.name }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="type">
-            <th mat-header-cell *matHeaderCellDef>Tipo</th>
-            <td mat-cell *matCellDef="let tournament">
-              {{ tournament.type === 'round_robin' ? 'Round Robin' : 'Fase de Grupos' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef>Categoría</th>
-            <td mat-cell *matCellDef="let tournament">{{ tournament.category }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="startDate">
-            <th mat-header-cell *matHeaderCellDef>Inicio</th>
-            <td mat-cell *matCellDef="let tournament" class="date-cell">
-              {{ tournament.startDate | date:'shortDate' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="endDate">
-            <th mat-header-cell *matHeaderCellDef>Fin</th>
-            <td mat-cell *matCellDef="let tournament" class="date-cell">
-              {{ tournament.endDate | date:'shortDate' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="teamCount">
-            <th mat-header-cell *matHeaderCellDef>Equipos</th>
-            <td mat-cell *matCellDef="let tournament" class="number-cell">
-              {{ tournament.teamCount }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let tournament">
-              <span class="status-badge" [class.active]="tournament.status === 'in_progress'">
-                <span class="status-dot" aria-hidden="true"></span>
-                {{ tournament.status === 'pending' ? 'Pendiente' :
-                   tournament.status === 'in_progress' ? 'En curso' : 'Finalizado' }}
-              </span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions" stickyEnd>
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let tournament">
-              <a
-                mat-button
-                [routerLink]="['/tournaments', tournament.id, 'edit']"
-                [attr.aria-label]="'Editar torneo ' + tournament.name"
-              >
-                <mat-icon>edit</mat-icon>
-                Editar
-              </a>
-              <button
-                mat-button
-                type="button"
-                [disabled]="deletingIds().has(tournament.id)"
-                (click)="deleteTournament(tournament)"
-                [attr.aria-label]="'Eliminar torneo ' + tournament.name"
-              >
-                <mat-icon>delete</mat-icon>
-                @if (deletingIds().has(tournament.id)) {
-                  Eliminando…
-                } @else {
-                  Eliminar
+              <div class="card-actions">
+                <span class="status-badge" [class]="'status-badge status-badge--' + tournament.status">
+                  {{ i18n.t(tournament.status === 'pending' ? 'Pendiente' : tournament.status === 'in_progress' ? 'En curso' : 'Finalizado') }}
+                </span>
+                <a class="action-button" [routerLink]="['/tournaments', tournament.id]">
+                  {{ i18n.t('Ver detalles') }} <span aria-hidden="true">›</span>
+                </a>
+                @if (tournament.status === 'in_progress') {
+                  <button
+                    class="action-button"
+                    type="button"
+                    [disabled]="finishingIds().has(tournament.id)"
+                    (click)="finishTournament(tournament)"
+                  >
+                    {{ finishingIds().has(tournament.id) ? i18n.t('Finalizando…') : i18n.t('Finalizar torneo') }}
+                    <span aria-hidden="true">›</span>
+                  </button>
                 }
-              </button>
-            </td>
-          </ng-container>
-        </table>
-      </div >
-    </mat-card-content>
-  </mat-card>
+                @if (tournament.status === 'pending') {
+                  <a class="action-button" [routerLink]="['/tournaments', tournament.id, 'edit']">
+                    {{ i18n.t('Modificar') }} <span aria-hidden="true">›</span>
+                  </a>
+                  <button
+                    class="action-button action-button--danger"
+                    type="button"
+                    [disabled]="deletingIds().has(tournament.id)"
+                    (click)="deleteTournament(tournament)"
+                  >
+                    {{ deletingIds().has(tournament.id) ? i18n.t('Eliminando…') : i18n.t('Eliminar') }}
+                    <span aria-hidden="true">›</span>
+                  </button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </section>
+
+  <footer class="site-footer">
+    <div class="site-footer__content">
+      <section class="footer-section">
+        <h2>{{ i18n.t('Producto') }}</h2>
+        <a routerLink="/tournaments/new">{{ i18n.t('Crear torneo') }}</a>
+        <a routerLink="/tournaments">{{ i18n.t('Buscar torneo') }}</a>
+      </section>
+      <section class="footer-section">
+        <h2>{{ i18n.t('Contacto') }}</h2>
+        <div class="social-links">
+          <a href="https://www.linkedin.com/in/anaclara-guzman" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn del primer contribuidor">
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+          <a href="https://www.linkedin.com/in/sebastian-rodriguez-luna" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn del segundo contribuidor">
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+        </div>
+      </section>
+      <p class="site-footer__copyright">
+        © {{ currentYear }} Ace Tournaments | {{ i18n.t('Todos los derechos reservados') }}
+      </p>
+    </div>
+  </footer>
 </main>

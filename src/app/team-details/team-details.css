@@ -1,0 +1,338 @@
+:host {
+  display: block;
+}
+
+.details-page {
+  min-height: 100vh;
+  color: #fff;
+  font-family: Roboto, Arial, sans-serif;
+}
+
+.details-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 76%), rgb(0 0 0 / 30%)),
+    url('/assets/volleyball.jpg') center 35% / cover no-repeat;
+}
+
+.site-header {
+  position: relative;
+  display: grid;
+  width: min(100% - 3rem, 1210px);
+  min-height: 84px;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 auto;
+  border-bottom: 1px solid rgb(255 218 112 / 75%);
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.8rem);
+}
+
+.main-nav__link,
+.language-picker,
+.language-picker select {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.main-nav__link {
+  text-decoration: none;
+}
+
+.language-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.language-picker select {
+  max-width: 120px;
+  padding: 0.35rem 1.3rem 0.35rem 0.2rem;
+  border: 0;
+  background: transparent;
+}
+
+.language-picker option {
+  color: #151027;
+  background: #fff;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  color: #fff;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transform: translateX(150px);
+}
+
+.brand__ball {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.brand-stripes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.brand-stripes span {
+  width: clamp(36px, 6vw, 74px);
+  height: 34px;
+  transform: skewX(-38deg);
+  border: 2px solid #fff;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.brand-stripes span:nth-child(2) {
+  background: #123378;
+}
+
+.brand-stripes span:nth-child(3) {
+  border-color: #ffda70;
+  background: #ffda70;
+}
+
+.details-content {
+  width: min(100% - 3rem, 1000px);
+  flex: 1;
+  align-self: center;
+  padding: 3rem 0;
+}
+
+.details-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.details-heading h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: #ffda70;
+  text-transform: uppercase;
+}
+
+.team-summary,
+.enrollment-section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 20px;
+  background: #06112f;
+}
+
+.team-summary p {
+  margin: 0.45rem 0;
+}
+
+.enrollment-section h2 {
+  margin: 0 0 1rem;
+}
+
+.enrollment-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.enrollment-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 12px;
+}
+
+.enrollment-item h3,
+.enrollment-item p {
+  margin: 0;
+}
+
+.enrollment-item p {
+  margin-top: 0.45rem;
+  color: #d3d7e2;
+  font-size: 0.9rem;
+}
+
+.enrollment-status {
+  color: #ffda70;
+  white-space: nowrap;
+}
+
+.details-button,
+.back-link {
+  color: #ffda70;
+}
+
+.details-button {
+  padding: 0.8rem 1.1rem;
+  border-radius: 999px;
+  background: #06112f;
+  text-decoration: none;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 1.5rem;
+}
+
+.details-message {
+  padding: 1.5rem;
+  border-radius: 14px;
+  background: #06112f;
+}
+
+.details-message--error {
+  color: #ffb4ab;
+}
+
+.site-footer {
+  background: #06112f;
+  color: #fff;
+}
+
+.site-footer__content {
+  display: grid;
+  width: min(100% - 3rem, 1240px);
+  grid-template-columns: 1fr 1fr auto;
+  align-items: center;
+  gap: 2rem;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.footer-section h2 {
+  margin: 0 0 0.25rem;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.footer-section a {
+  color: #e4e6ed;
+  text-decoration: none;
+}
+
+.social-links {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.social-links a {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+}
+
+.social-links img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.site-footer__copyright {
+  align-self: end;
+  margin: 0;
+  color: #d3d7e2;
+  font-size: 0.82rem;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .details-hero {
+    background-position: 58% 35%;
+  }
+
+  .site-header {
+    width: calc(100% - 2rem);
+    min-height: 76px;
+    grid-template-columns: 1fr auto;
+  }
+
+  .main-nav {
+    gap: 0.8rem;
+  }
+
+  .main-nav__link,
+  .language-picker,
+  .language-picker select {
+    font-size: 0.78rem;
+  }
+
+  .language-picker {
+    gap: 0.25rem;
+  }
+
+  .brand {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 0.95rem;
+    transform: none;
+  }
+
+  .brand__ball {
+    width: 26px;
+    height: 26px;
+  }
+
+  .brand-stripes {
+    display: none;
+  }
+
+  .details-content,
+  .site-footer__content {
+    width: calc(100% - 2rem);
+  }
+
+  .details-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .enrollment-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .site-footer__content {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.8rem 1rem;
+  }
+
+  .site-footer__copyright {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+}
