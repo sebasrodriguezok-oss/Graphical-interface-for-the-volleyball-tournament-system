@@ -1,103 +1,270 @@
-<main class="form-page">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>
-        {{ isEditing() ? 'Editar Torneo' : 'Nuevo Torneo' }}
-      </mat-card-title>
-      <mat-card-subtitle>
-        {{ isEditing() ? 'Modifica los datos del torneo y guarda los cambios' : 'Completa los datos para crear un nuevo torneo' }}
-      </mat-card-subtitle>
-    </mat-card-header>
+<main class="tournament-page">
+  <section class="form-hero" aria-labelledby="form-title">
+    <header class="site-header">
+      <nav class="main-nav" [attr.aria-label]="i18n.t('Menú principal')">
+        <a class="main-nav__link" routerLink="/">
+          {{ i18n.t('Inicio') }}
+        </a>
 
-    <mat-card-content>
+        <label class="language-picker">
+          <span>{{ i18n.t('Idioma') }}</span>
+          <select
+            [attr.aria-label]="i18n.t('Seleccionar idioma')"
+            [value]="i18n.language()"
+            (change)="onLanguageChange($event)"
+          >
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </nav>
+
+      <a class="brand" routerLink="/" [attr.aria-label]="i18n.t('Ace Tournaments, inicio')">
+        <img class="brand__ball" src="assets/volley-ball.png" alt="" aria-hidden="true" />
+        <span>Ace Tournaments</span>
+      </a>
+
+      <div class="brand-stripes" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </header>
+
+    <div class="form-layout">
       @if (loading()) {
         <div class="loading-panel" role="status">
-          <mat-spinner diameter="36"></mat-spinner> Cargando torneo…
+          <mat-spinner diameter="36"></mat-spinner>
+          <span>{{ i18n.t('Cargando torneo…') }}</span>
         </div>
       }
+
       @if (loadFailed()) {
-        <p class="error-message" role="alert">{{ errorMessage() }}</p>
-        <a mat-button routerLink="/tournaments">Volver a torneos</a>
+        <div class="form-error-panel">
+          <p class="error-message" role="alert">{{ i18n.t(errorMessage()!) }}</p>
+          <a class="form-button form-button--secondary" routerLink="/">
+            {{ i18n.t('Volver al inicio') }}
+          </a>
+        </div>
       }
+
       @if (!loading() && !loadFailed()) {
-        <form [formGroup]="form" (ngSubmit)="submit()">
-          <div class="form-grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Nombre del Torneo</mat-label>
-              <input matInput formControlName="name" />
-              @if (form.controls.name.hasError('required')) {
-                <mat-error>El nombre es obligatorio</mat-error>
-              } @else if (form.controls.name.hasError('maxlength')) {
-                <mat-error>El máximo es de 100 caracteres</mat-error>
-              }
-            </mat-form-field>
+        <section class="form-panel">
+          <header class="form-heading">
+            <h1 id="form-title">
+              {{ i18n.t(isEditing() ? 'Editar torneo' : 'Nuevo torneo') }}
+            </h1>
+            <p>
+              {{
+                i18n.t(
+                  isEditing()
+                    ? 'Modifica los datos del torneo y guarda los cambios'
+                    : 'Completa los datos para crear un nuevo torneo'
+                )
+              }}
+            </p>
+          </header>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Tipo de Torneo</mat-label>
-              <mat-select formControlName="type">
-                <mat-option value="round_robin">Round Robin</mat-option>
-                <mat-option value="group_stage">Fase de Grupos</mat-option>
-              </mat-select>
-            </mat-form-field>
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="form-grid">
+              <div class="field field--wide">
+                <label for="tournament-name">{{ i18n.t('Nombre del torneo') }}</label>
+                <input
+                  id="tournament-name"
+                  class="control"
+                  type="text"
+                  formControlName="name"
+                  [placeholder]="i18n.t('Ejemplo: Grand Prix 2026')"
+                  [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched"
+                  [attr.aria-describedby]="form.controls.name.touched ? 'name-error' : null"
+                  maxlength="100"
+                  autocomplete="off"
+                />
+                @if (form.controls.name.touched && form.controls.name.invalid) {
+                  <span class="field-error" id="name-error" role="alert">
+                    @if (form.controls.name.hasError('tournamentExists')) {
+                      {{ i18n.t('Ya existe un torneo con ese nombre') }}
+                    } @else if (form.controls.name.hasError('maxlength')) {
+                      {{ i18n.t('El nombre no puede superar 100 caracteres') }}
+                    } @else {
+                      {{ i18n.t('El nombre es obligatorio') }}
+                    }
+                  </span>
+                }
+              </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Categoría</mat-label>
-              <input matInput formControlName="category" />
-              @if (form.controls.category.invalid && form.controls.category.touched) {
-                <mat-error>La categoría es obligatoria</mat-error>
-              }
-            </mat-form-field>
+              <div class="field">
+                <label for="start-date">{{ i18n.t('Fecha de inicio') }}</label>
+                <input
+                  id="start-date"
+                  class="control"
+                  type="date"
+                  formControlName="startDate"
+                  [min]="startDateMin()"
+                  [attr.aria-invalid]="form.controls.startDate.invalid && form.controls.startDate.touched"
+                  [attr.aria-describedby]="form.controls.startDate.touched ? 'start-date-error' : null"
+                />
+                @if (form.controls.startDate.touched && form.controls.startDate.invalid) {
+                  <span class="field-error" id="start-date-error" role="alert">
+                    @if (form.controls.startDate.hasError('pastDate')) {
+                      {{ i18n.t('La fecha de inicio no puede ser anterior a hoy') }}
+                    } @else if (form.controls.startDate.hasError('pattern')) {
+                      {{ i18n.t('La fecha de inicio no es válida') }}
+                    } @else {
+                      {{ i18n.t('La fecha de inicio es obligatoria') }}
+                    }
+                  </span>
+                }
+              </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Fecha de Inicio</mat-label>
-              <input matInput type="date" formControlName="startDate" />
-              @if (form.controls.startDate.invalid && form.controls.startDate.touched) {
-                <mat-error>La fecha es obligatoria</mat-error>
-              }
-            </mat-form-field>
+              <div class="field">
+                <label for="end-date">{{ i18n.t('Fecha de finalización') }}</label>
+                <input
+                  id="end-date"
+                  class="control"
+                  type="date"
+                  formControlName="endDate"
+                  [attr.aria-invalid]="
+                    (form.controls.endDate.invalid || form.hasError('dateOrder')) &&
+                    form.controls.endDate.touched
+                  "
+                  [attr.aria-describedby]="form.controls.endDate.touched ? 'end-date-error' : null"
+                />
+                @if (form.controls.endDate.touched && form.controls.endDate.invalid) {
+                  <span class="field-error" id="end-date-error" role="alert">
+                    @if (form.controls.endDate.hasError('pattern')) {
+                      {{ i18n.t('La fecha de finalización no es válida') }}
+                    } @else {
+                      {{ i18n.t('La fecha de finalización es obligatoria') }}
+                    }
+                  </span>
+                } @else if (form.hasError('dateOrder') && form.controls.endDate.touched) {
+                  <span class="field-error" id="end-date-error" role="alert">
+                    {{ i18n.t('La fecha de finalización debe ser igual o posterior al inicio') }}
+                  </span>
+                }
+              </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Fecha de Fin</mat-label>
-              <input matInput type="date" formControlName="endDate" />
-              @if (form.controls.endDate.invalid && form.controls.endDate.touched) {
-                <mat-error>La fecha es obligatoria</mat-error>
-              }
-            </mat-form-field>
+              <div class="field">
+                <label for="tournament-type">{{ i18n.t('Modalidad') }}</label>
+                <select
+                  id="tournament-type"
+                  class="control control--select"
+                  formControlName="type"
+                >
+                  <option value="round_robin">{{ i18n.t('Todos contra todos (Round Robin)') }}</option>
+                </select>
+              </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Cantidad de Equipos</mat-label>
-              <input matInput type="number" formControlName="teamCount" />
-              @if (form.controls.teamCount.invalid && form.controls.teamCount.touched) {
-                <mat-error>Debe estar entre 2 y 64 equipos</mat-error>
-              }
-            </mat-form-field>
+              <div class="field">
+                <label for="category">{{ i18n.t('Categoría') }}</label>
+                <select
+                  id="category"
+                  class="control control--select"
+                  formControlName="category"
+                  [attr.aria-invalid]="form.controls.category.invalid && form.controls.category.touched"
+                  [attr.aria-describedby]="form.controls.category.touched ? 'category-error' : null"
+                >
+                  <option value="" disabled>{{ i18n.t('Seleccionar categoría') }}</option>
+                  @for (category of categoryOptions; track category.value) {
+                    <option [value]="category.value">{{ i18n.t(category.label) }}</option>
+                  }
+                </select>
+                @if (form.controls.category.touched && form.controls.category.invalid) {
+                  <span class="field-error" id="category-error" role="alert">
+                    {{ i18n.t('La categoría es obligatoria') }}
+                  </span>
+                }
+              </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Estado</mat-label>
-              <mat-select formControlName="status">
-                <mat-option value="pending">Pendiente</mat-option>
-                <mat-option value="in_progress">En curso</mat-option>
-                <mat-option value="finished">Finalizado</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div >
+              <div class="field">
+                <label for="team-count">{{ i18n.t('Cantidad de equipos') }}</label>
+                <input
+                  id="team-count"
+                  class="control"
+                  type="number"
+                  formControlName="teamCount"
+                  min="2"
+                  max="16"
+                  step="1"
+                  [attr.aria-invalid]="form.controls.teamCount.invalid && form.controls.teamCount.touched"
+                  [attr.aria-describedby]="form.controls.teamCount.touched ? 'team-count-error' : null"
+                />
+                @if (form.controls.teamCount.touched && form.controls.teamCount.invalid) {
+                  <span class="field-error" id="team-count-error" role="alert">
+                    @if (form.controls.teamCount.hasError('pattern')) {
+                      {{ i18n.t('La cantidad debe ser un número entero') }}
+                    } @else {
+                      {{ i18n.t('La cantidad debe estar entre 2 y 16') }}
+                    }
+                  </span>
+                }
+              </div>
+            </div>
 
-          @if (errorMessage()) {
-            <p class="error-message" role="alert">{{ errorMessage() }}</p>
-          }
+            @if (errorMessage() && !loadFailed()) {
+              <p class="error-message" role="alert">{{ i18n.t(errorMessage()!) }}</p>
+            }
 
-          <div class="actions">
-            <a mat-button routerLink="/tournaments">Cancelar</a>
-            <button mat-flat-button type="submit" [disabled]="saving()">
-              @if (saving()) {
-                <mat-spinner diameter="20"></mat-spinner> Guardando…
-              } @else {
-                {{ isEditing() ? 'Guardar cambios' : 'Crear Torneo' }}
-              }
-            </button>
-          </div >
-        </form>
+            <div class="form-actions">
+              <a class="form-button form-button--secondary" routerLink="/">
+                {{ i18n.t('Cancelar') }}
+                <span aria-hidden="true">›</span>
+              </a>
+              <button
+                class="form-button form-button--primary"
+                type="submit"
+                [disabled]="saving() || loading() || form.invalid"
+              >
+                @if (saving()) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                  {{ i18n.t('Guardando…') }}
+                } @else {
+                  {{ i18n.t(isEditing() ? 'Guardar cambios' : 'Crear torneo') }}
+                  <span aria-hidden="true">›</span>
+                }
+              </button>
+            </div>
+          </form>
+        </section>
       }
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="site-footer__content">
+      <section class="footer-section" [attr.aria-label]="i18n.t('Producto')">
+        <h2>{{ i18n.t('Producto') }}</h2>
+        <a routerLink="/tournaments/new">{{ i18n.t('Crear torneo') }}</a>
+        <a routerLink="/tournaments">{{ i18n.t('Buscar torneo') }}</a>
+      </section>
+
+      <section class="footer-section" [attr.aria-label]="i18n.t('Contacto')">
+        <h2>{{ i18n.t('Contacto') }}</h2>
+        <div class="social-links">
+          <a
+            href="https://www.linkedin.com/in/anaclara-guzman"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn del primer contribuidor"
+          >
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+          <a
+            href="https://www.linkedin.com/in/sebastian-rodriguez-luna"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn del segundo contribuidor"
+          >
+            <img src="assets/linkedin.png" alt="" aria-hidden="true" />
+          </a>
+        </div>
+      </section>
+
+      <p class="site-footer__copyright">
+        © {{ currentYear }} Ace Tournaments |
+        {{ i18n.t('Todos los derechos reservados') }}
+      </p>
+    </div>
+  </footer>
 </main>

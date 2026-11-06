@@ -1,0 +1,282 @@
+export const en = {
+  'Inicio | Ace Tournaments': 'Home | Ace Tournaments',
+  Inicio: 'Home',
+  'Menú principal': 'Main menu',
+  Idioma: 'Language',
+  'Seleccionar idioma': 'Select language',
+  'Ace Tournaments, inicio': 'Ace Tournaments, home',
+
+  'Creador de torneos de voley': 'Volleyball Tournament Creator',
+  'Organizá tu torneo, generá el fixture, cargá los resultados y consultá las posiciones.':
+    'Organize your tournament, generate the schedule, enter results and check the standings.',
+  'Comienza tu torneo': 'Start your tournament',
+  'Ver torneos': 'View tournaments',
+
+  Producto: 'Product',
+  'Crear torneo': 'Create tournament',
+  'Buscar torneo': 'Find a tournament',
+  'Buscar torneo…': 'Search tournaments…',
+  'Encuentra Torneos': 'Find Tournaments',
+  'Filtrar torneos por estado': 'Filter tournaments by status',
+  Pendientes: 'Pending',
+  Finalizados: 'Finished',
+  'Torneos disponibles': 'Available tournaments',
+  'Cargando torneos…': 'Loading tournaments…',
+  'No se pudieron cargar los torneos. Intenta nuevamente más tarde.':
+    'Could not load tournaments. Please try again later.',
+  resultados: 'results',
+  'Todavía no hay torneos': 'There are no tournaments yet',
+  'No hay torneos que coincidan': 'No matching tournaments',
+  'Finalizando…': 'Finalizing…',
+  'Cargando fixture…': 'Loading fixture…',
+  equipos: 'teams',
+  Contacto: 'Contact',
+  'Todos los derechos reservados': 'All rights reserved',
+
+  'Nuevo torneo': 'New tournament',
+  'Completa los datos para crear un nuevo torneo': 'Fill in the details to create a new tournament',
+  'Editar torneo': 'Edit tournament',
+  'Modifica los datos del torneo y guarda los cambios': 'Update the tournament details and save your changes',
+  'Nombre del torneo': 'Tournament name',
+  'Ejemplo: Grand Prix 2026': 'Example: Grand Prix 2026',
+  'El nombre es obligatorio': 'Tournament name is required',
+  'El nombre no puede superar 100 caracteres': 'Name cannot exceed 100 characters',
+  'Fecha de inicio': 'Start date',
+  'Fecha de finalización': 'End date',
+  'La fecha de inicio es obligatoria': 'Start date is required',
+  'La fecha de finalización es obligatoria': 'End date is required',
+  'La fecha de finalización debe ser igual o posterior al inicio': 'End date must be equal to or after the start date',
+  'La fecha de inicio no puede ser anterior a hoy': 'Start date cannot be before today',
+  'La fecha de inicio no es válida': 'Start date is invalid',
+  'La fecha de finalización no es válida': 'End date is invalid',
+  'Ya existe un torneo con ese nombre': 'A tournament with that name already exists',
+  'No se pudieron verificar los torneos. Intenta nuevamente.':
+    'Could not verify tournaments. Please try again.',
+  'No se puede reducir la cantidad por debajo de los equipos inscriptos':
+    'Team count cannot be lower than the number of enrolled teams',
+  'No se puede modificar la estructura de un torneo iniciado':
+    'The structure of a started tournament cannot be changed',
+  'No se puede modificar la estructura de un torneo con fixture':
+    'The structure of a tournament with a generated fixture cannot be changed',
+  'No se puede cambiar la categoría mientras haya equipos inscriptos':
+    'The category cannot change while teams are enrolled',
+  'Solo se permite la modalidad todos contra todos (Round Robin)':
+    'Only Round Robin tournaments are supported',
+  'Las fechas dejarían partidos fuera del período del torneo':
+    'The new dates would exclude scheduled matches',
+  'Tipo de torneo': 'Tournament type',
+  Modalidad: 'Format',
+  'Round Robin': 'Round Robin',
+  'Todos contra todos (Round Robin)': 'Round Robin',
+  Categoría: 'Category',
+  'Seleccionar categoría': 'Select a category',
+  'La categoría es obligatoria': 'Category is required',
+  Estado: 'Status',
+  'Seleccionar estado': 'Select a status',
+  'El estado es obligatorio': 'Status is required',
+  Pendiente: 'Pending',
+  'En curso': 'In progress',
+  Finalizado: 'Finished',
+  'Cantidad de equipos': 'Number of teams',
+  'La cantidad debe ser un número entero': 'The quantity must be a whole number',
+  'La cantidad debe estar entre 2 y 16': 'Enter between 2 and 16 teams',
+  'La cantidad debe estar entre 2 y 20': 'Enter between 2 and 20 teams',
+  'Sub 12 Femenino': 'U12 - Women',
+  'Sub 12 Masculino': 'U12 - Men',
+  'Sub 14 Femenino': 'U14 - Women',
+  'Sub 14 Masculino': 'U14 - Men',
+  'Sub 16 Femenino': 'U16 - Women',
+  'Sub 16 Masculino': 'U16 - Men',
+  'Sub 18 Femenino': 'U18 - Women',
+  'Sub 18 Masculino': 'U18 - Men',
+  'Sub 21 Femenino': 'U21 - Women',
+  'Sub 21 Masculino': 'Un21 - Men',
+  'Primera División Femenino': 'First Division - Women',
+  'Primera División Masculino': 'First Division - Men',
+  'Maxivoley Femenino': 'Maxi Volleyball - Women',
+  'Maxivoley Masculino': 'Maxi Volleyball - Men',
+  'Cargando torneo…': 'Loading tournament…',
+  'No se pudo cargar el torneo.': 'Could not load the tournament.',
+  'Volver al inicio': 'Back to home',
+  Cancelar: 'Cancel',
+  'Guardar cambios': 'Save changes',
+  'Guardando…': 'Saving…',
+  'No se pudo actualizar el torneo. Revisa los datos e intenta nuevamente.':
+    'Could not update the tournament. Check the details and try again.',
+  'No se pudo crear el torneo. Revisa los datos e intenta nuevamente.':
+    'Could not create the tournament. Check the details and try again.',
+
+  Equipos: 'Teams',
+  'Gestiona los equipos registrados en el sistema': 'Manage the teams registered in the system',
+  'Crear equipo': 'Create team',
+  'Buscar equipo': 'Search teams',
+  'Buscar equipo…': 'Search teams…',
+  Todos: 'All',
+  'Cargando equipos…': 'Loading teams…',
+  'No hay equipos que coincidan con la búsqueda.': 'No teams match your search.',
+  'Todavía no hay equipos registrados.': 'There are no teams registered yet.',
+  jugador: 'player',
+  jugadores: 'players',
+  Entrenador: 'Coach',
+  Eliminar: 'Delete',
+  Modificar: 'Edit',
+  'Ver detalles': 'View details',
+  'Eliminando…': 'Deleting…',
+  '¿Seguro que quieres eliminar el equipo {name}?': 'Are you sure you want to delete team {name}?',
+  'No se pudieron cargar los equipos. Intenta nuevamente más tarde.':
+    'Could not load teams. Please try again later.',
+  'No se pudo eliminar el equipo. Intenta nuevamente.':
+    'Could not delete the team. Please try again.',
+  'No se puede eliminar el equipo porque tiene inscripciones activas':
+    'Cannot delete a team with active enrollments.',
+  'No se puede eliminar el equipo porque tiene partidos disputados':
+    'Cannot delete a team that has played matches.',
+
+  'Nuevo equipo': 'New team',
+  'Completa los datos para registrar un equipo': 'Enter the details to register a team',
+  'Editar equipo': 'Edit team',
+  'Modifica los datos del equipo y guarda los cambios': 'Update the team details and save your changes',
+  'Nombre del equipo': 'Team name',
+  'Ejemplo: Los churros': 'Example: The Churros',
+  'El nombre del equipo es obligatorio': 'Team name is required',
+  'Ya existe un equipo con ese nombre': 'A team with that name already exists',
+  'Selecciona una categoría habilitada': 'Select an available category',
+  'Cantidad de jugadores': 'Number of players',
+  'El equipo debe tener al menos 6 jugadores': 'A team must have at least 6 players',
+  'Entrenador (opcional)': 'Coach (optional)',
+  'Nombre del entrenador': 'Coach name',
+  'Cargando equipo…': 'Loading team…',
+  'No se pudo cargar el equipo': 'Could not load the team.',
+  'Volver a equipos': 'Back to teams',
+  'No se pudo crear el equipo. Revisa los datos e intenta nuevamente.':
+    'Could not create the team. Check the details and try again.',
+  'No se pudo actualizar el equipo. Revisa los datos e intenta nuevamente.':
+    'Could not update the team. Check the details and try again.',
+  'No se puede cambiar la categoría por las inscripciones activas':
+    'Cannot change category because of active tournament enrollments.',
+  'Error de carga de equipo': 'Could not load the team details.',
+  'Detalle del equipo': 'Team details',
+  Inscripciones: 'Enrollments',
+  'No hay inscripciones registradas para este equipo.':
+    'This team has no tournament enrollments.',
+  Activa: 'Active',
+  Retirada: 'Withdrawn',
+  Cancelada: 'Cancelled',
+  'Fecha de inscripción': 'Enrollment date',
+  'Torneo no encontrado': 'Tournament not found',
+  'Ver todos los equipos': 'View all teams',
+  'Modificar equipo': 'Edit team',
+
+  'Confirmar eliminación de torneo':
+    'Delete tournament "{name}"? Its enrollments and all unplayed matches will also be deleted.',
+  'El torneo se eliminó correctamente': 'Tournament deleted successfully',
+  'No se pudo eliminar el torneo': 'Could not delete tournament',
+  'Finalizar torneo': 'Finalize tournament',
+  '¿Finalizar el torneo {name}?': 'Finalize tournament "{name}"?',
+  'El torneo se finalizó correctamente': 'Tournament finalized successfully',
+  'No se pudo finalizar el torneo': 'Could not finalize tournament',
+  'Solo se pueden eliminar torneos pendientes': 'Only pending tournaments can be deleted',
+  'No se puede eliminar un torneo con partidos disputados o resultados':
+    'A tournament with played matches or results cannot be deleted',
+  'No se puede finalizar un torneo con partidos sin resolver':
+    'A tournament cannot be finalized while matches remain unresolved',
+  'Torneo {name}': 'Tournament {name}',
+  'Información general': 'General information',
+  'Equipos esperados': 'Expected teams',
+  'Acciones del torneo': 'Tournament actions',
+  'Generar Fixture': 'Generate Fixture',
+  'Cargar resultados': 'Enter results',
+  'Equipos participantes': 'Participating teams',
+  Inscripto: 'Enrolled',
+  'Inscribir otro equipo': 'Enroll another team',
+  'Todavía no hay equipos inscriptos': 'There are no enrolled teams yet',
+  'Para generar el fixture deben inscribirse todos los equipos esperados.':
+    'All expected teams must be enrolled before generating the fixture.',
+  'Las inscripciones quedan cerradas al generar el fixture.':
+    'Enrollments are closed once the fixture is generated.',
+  'Equipo no encontrado': 'Team not found',
+  'Generando fixture…': 'Generating fixture…',
+  'Fixture generado correctamente': 'Fixture generated: {matches} matches across {rounds} rounds',
+  'No se pudo generar el fixture.': 'Could not generate the fixture.',
+  'Inscribir equipo al Torneo': 'Enroll a team in a tournament',
+  'Vincula un equipo a un torneo para comenzar la competición':
+    'Link a team to a tournament to start the competition',
+  'Cargando datos de inscripción…': 'Loading enrollment data…',
+  'Seleccionar torneo': 'Select a tournament',
+  'Seleccionar equipo': 'Select a team',
+  'El torneo es obligatorio': 'A tournament is required',
+  'El equipo es obligatorio': 'A team is required',
+  'Categoría del torneo': 'Tournament category',
+  'equipos inscriptos': 'teams enrolled',
+  'Verificando disponibilidad del torneo…': 'Checking tournament availability…',
+  'Verificando inscripción del equipo…': 'Checking team enrollment…',
+  'No hay torneos pendientes disponibles para inscribir equipos.':
+    'There are no pending tournaments available for enrollment.',
+  'No hay equipos disponibles de la categoría del torneo.':
+    'There are no teams available in this tournament category.',
+  'Solo se permiten inscripciones en torneos pendientes':
+    'Enrollment is only open for pending tournaments.',
+  'No se puede inscribir después de generar el fixture':
+    'Teams cannot be enrolled after the fixture is generated.',
+  'El torneo alcanzó su capacidad máxima de equipos':
+    'The tournament has reached its team capacity.',
+  'La categoría del equipo no coincide con la del torneo':
+    'The team category does not match the tournament category.',
+  'El equipo ya está inscripto en este torneo':
+    'The team is already enrolled in this tournament.',
+  'No se pudieron verificar las inscripciones. Intenta nuevamente.':
+    'Could not verify enrollments. Please try again.',
+  'No se pudo verificar el historial del equipo. Intenta nuevamente.':
+    'Could not verify the team history. Please try again.',
+  'Procesando inscripción…': 'Processing enrollment…',
+  'Confirmar inscripción': 'Confirm enrollment',
+  'No se pudieron cargar los datos de inscripción. Intenta nuevamente.':
+    'Could not load enrollment data. Please try again.',
+  'No se pudo realizar la inscripción. Intenta nuevamente.':
+    'Could not complete the enrollment. Please try again.',
+  'Fixture del torneo': 'Tournament fixture',
+  'Calendario de partidos': 'Match schedule',
+  'Partidos organizados por ronda': 'Matches organized by round',
+  'Tabla de posiciones': 'Standings',
+  'Volver al torneo': 'Back to tournament',
+  'Progreso del fixture': 'Fixture progress',
+  'Partidos resueltos': 'Matches completed',
+  'partidos resueltos': 'matches completed',
+  'Torneo finalizado': 'Tournament finished',
+  'El torneo finalizó automáticamente al cargarse todos los resultados.':
+    'The tournament was automatically finalized after all results were entered.',
+  'Ronda {round}': 'Round {round}',
+  Programado: 'Scheduled',
+  'En juego': 'In progress',
+  Local: 'Home',
+  Visitante: 'Away',
+  'Resultado de sets': 'Set result',
+  'Resultado en sets': 'Set score',
+  'Selecciona el resultado': 'Select the result',
+  'Guardar resultado': 'Save result',
+  'Actualizar resultado': 'Update result',
+  'Resultado guardado correctamente.': 'Result saved successfully.',
+  'No se pudo guardar el resultado. Intenta nuevamente.':
+    'Could not save the result. Please try again.',
+  'El resultado del partido está incompleto': 'The match result is incomplete',
+  'El resultado debe ser 2-0, 2-1, 1-2 o 0-2': 'The result must be 2-0, 2-1, 1-2, or 0-2',
+  'No se pueden modificar partidos de un torneo finalizado':
+    'Matches in a finished tournament cannot be modified',
+  'No se pudo cargar el fixture. Intenta nuevamente.':
+    'Could not load the fixture. Please try again.',
+  'No se ha especificado un torneo.': 'No tournament was specified.',
+  'No hay partidos programados para este torneo.':
+    'There are no matches scheduled for this tournament.',
+  '¿Eliminar al equipo {name} de este torneo?': 'Remove team "{name}" from this tournament?',
+  'Equipo eliminado de la inscripción': 'Team removed from the tournament',
+  'No se pudo eliminar la inscripción.': 'Could not remove the enrollment.',
+  'Al menos dos equipos deben estar inscriptos para generar el fixture':
+    'At least two teams must be enrolled to generate the fixture',
+  'La cantidad de equipos inscriptos debe coincidir con la esperada':
+    'The number of enrolled teams must match the expected count',
+  'Todos los equipos deben pertenecer a la categoría del torneo':
+    'All teams must belong to the tournament category',
+} as const;
+
+export type TranslationKey = keyof typeof en;
+export type Language = 'es' | 'en';

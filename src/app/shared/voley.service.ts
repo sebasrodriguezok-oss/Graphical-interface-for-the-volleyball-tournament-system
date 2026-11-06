@@ -1,7 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Tournament, Team, Match, Enrollment, Standing } from './voley';
+import {
+  Tournament,
+  TournamentPayload,
+  Team,
+  TeamPayload,
+  TeamUpdate,
+  Match,
+  Enrollment,
+  Standing,
+} from './voley';
 
 @Injectable({
   providedIn: 'root',
@@ -20,16 +29,32 @@ export class VoleyService {
     return this.httpClient.get<Tournament>(`${this.apiUrl}/tournaments/${id}`);
   }
 
-  createTournament(tournament: Partial<Tournament>): Observable<Tournament> {
+  createTournament(tournament: TournamentPayload): Observable<Tournament> {
     return this.httpClient.post<Tournament>(`${this.apiUrl}/tournaments`, tournament);
   }
 
-  updateTournament(id: string, changes: Partial<Tournament>): Observable<Tournament> {
+  updateTournament(id: string, changes: Partial<TournamentPayload>): Observable<Tournament> {
     return this.httpClient.put<Tournament>(`${this.apiUrl}/tournaments/${id}`, changes);
   }
 
   deleteTournament(id: string): Observable<void> {
     return this.httpClient.delete<void>(`${this.apiUrl}/tournaments/${id}`);
+  }
+
+  finishTournament(id: string): Observable<Tournament> {
+    return this.httpClient.post<Tournament>(`${this.apiUrl}/tournaments/${id}/finish`, {});
+  }
+
+  generateFixture(tournamentId: string): Observable<{
+    message: string;
+    rounds: number;
+    matches: number;
+  }> {
+    return this.httpClient.post<{
+      message: string;
+      rounds: number;
+      matches: number;
+    }>(`${this.apiUrl}/fixtures/${tournamentId}/generate`, {});
   }
 
   // Teams
@@ -41,11 +66,11 @@ export class VoleyService {
     return this.httpClient.get<Team>(`${this.apiUrl}/teams/${id}`);
   }
 
-  createTeam(team: Partial<Team>): Observable<Team> {
+  createTeam(team: TeamPayload): Observable<Team> {
     return this.httpClient.post<Team>(`${this.apiUrl}/teams`, team);
   }
 
-  updateTeam(id: string, changes: Partial<Team>): Observable<Team> {
+  updateTeam(id: string, changes: TeamUpdate): Observable<Team> {
     return this.httpClient.put<Team>(`${this.apiUrl}/teams/${id}`, changes);
   }
 
@@ -60,6 +85,14 @@ export class VoleyService {
 
   getEnrollmentsByTournament(tournamentId: string): Observable<Enrollment[]> {
     return this.httpClient.get<Enrollment[]>(`${this.apiUrl}/enrollments/tournament/${tournamentId}`);
+  }
+
+  withdrawEnrollment(id: string): Observable<Enrollment> {
+    return this.httpClient.patch<Enrollment>(`${this.apiUrl}/enrollments/${id}/withdraw`, {});
+  }
+
+  getEnrollmentsByTeam(teamId: string): Observable<Enrollment[]> {
+    return this.httpClient.get<Enrollment[]>(`${this.apiUrl}/enrollments/team/${teamId}`);
   }
 
   // Matches
